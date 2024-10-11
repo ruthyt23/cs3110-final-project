@@ -5,4 +5,4 @@
 - Ruth Taddesse (ryt5@cornell.edu)
 - Naomi Naranjo (nsn25@cornell.edu)
 - Celeste Naughton (can82@cornell.edu)
-
+- Charles Liggins (cll258@cornell.edu)
