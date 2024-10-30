@@ -15,9 +15,17 @@ val bank_money : player -> int -> player
 (** [bank_money player amount] returns a new player with the [amount] added to
     their [bank] *)
 
+val remove_from_bank : player -> int -> player
+(** [remove_from_bank player amount] returns a new player with [amount] removed
+    from their bank*)
+
 val add_property : player -> string * string -> player
 (** [add_property player property] returns a new player with the given
     [property] added to their [properties] *)
+
+val remove_property : player -> string * string -> player
+(** [remove_property player property] returns a new player with the given
+    [property] removed from their [properties] *)
 
 val get_name : player -> string
 (** [get_name player] returns the name of the player*)

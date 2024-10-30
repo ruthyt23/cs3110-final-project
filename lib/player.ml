@@ -8,9 +8,16 @@ type player = {
 let init_player name = { name; hand = []; bank = 0; properties = [] }
 let add_to_hand player card = { player with hand = card :: player.hand }
 let bank_money player amount = { player with bank = player.bank + amount }
+let remove_from_bank player amount = { player with bank = player.bank - amount }
 
 let add_property player property =
   { player with properties = property :: player.properties }
+
+let remove_property player property =
+  {
+    player with
+    properties = List.filter (fun elem -> elem <> property) player.properties;
+  }
 
 let get_name player = player.name
 let get_hand player = player.hand
