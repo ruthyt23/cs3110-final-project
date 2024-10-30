@@ -34,6 +34,12 @@ let main () =
   let player2 = Player.init_player "player 2" in
   let players = [ player1; player2 ] in
   let _ = Game_state.init_game players in
+  while List.length (List.filter check_win_condition players) = 0 do
+    print_endline "something"
+  done;
+  print_endline "WINNERS: ";
+  List.filter check_win_condition players
+  |> List.iter (fun winner -> print_endline (Player.get_name winner));
   print_endline "Thanks for playing!"
 ;;
 
