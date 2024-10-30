@@ -1,9 +1,5 @@
-type card =
-  | Action of string
-  | Property of string * string
-  | Money of int
-
-type player
+open Player
+open Deck
 
 val deal_breaker :
   player -> player -> (string * string) list -> string -> player * player
@@ -23,7 +19,7 @@ val debt_collector : player -> player -> int -> player * player
 (** [debt_collector player1 player2 debt] forces [player1] to pay [debt] to
     [player2]. *)
 
-val pass_go : player -> Deck.card list -> player
+val pass_go : player -> card list -> player
 (** [pass_go player1 deck] allows [player1] to draw two cards from [deck]. *)
 
 val its_my_birthday : player -> player list -> player list

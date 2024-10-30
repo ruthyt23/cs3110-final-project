@@ -1,11 +1,6 @@
 open Deck
 include Player
 
-type card =
-  | Action of string
-  | Property of string * string
-  | Money of int
-
 (** Steal full set of properties from another player based on the color they say
     they want *)
 let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
