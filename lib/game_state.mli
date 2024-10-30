@@ -7,7 +7,7 @@ val init_game : Player.player list -> game_state
 
 val next_turn : game_state -> game_state
 (** [next_turn game_state] advances the game state by returning a new
-    [game_state] with the [curr_player_index] updated to the next playe *)
+    [game_state] with the [curr_player_index] updated to the next player *)
 
 val check_win_condition : Player.player -> bool
 (** [check_win_condition player] checks if the given [player] has met the win
