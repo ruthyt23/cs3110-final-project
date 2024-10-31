@@ -24,3 +24,7 @@ val draw_card : game_state -> game_state
 (** [draw_card game_state] allows the current player to draw a card from the
     [deck], returns a new [game_state] with the drawn card added to the player's
     hand and the [deck] updated accordingly *)
+
+val get_current_player : game_state -> Player.player
+val get_players : game_state -> Player.player list
+val get_current_player_index : game_state -> int

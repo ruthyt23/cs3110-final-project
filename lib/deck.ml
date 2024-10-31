@@ -134,6 +134,8 @@ let draw_card deck =
   | card :: rest -> (card, rest)
 
 let shuffle_deck deck =
+  Random.self_init ();
+  (* Initialize random number generator *)
   let new_deck = List.map (fun c -> (Random.bits (), c)) deck in
   let sorted_deck = List.sort compare new_deck in
   List.map (fun (_, card) -> card) sorted_deck

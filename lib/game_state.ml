@@ -7,16 +7,6 @@ type game_state = {
   deck : Deck.card list;
 }
 
-let init_game starting_players =
-  match starting_players with
-  | [] -> failwith "at least 2 players are required"
-  | first_player :: rest ->
-      {
-        players = starting_players;
-        curr_player_index = 0;
-        deck = shuffle_deck (init_deck ());
-      }
-
 let next_turn game_state =
   let num_players = List.length game_state.players in
   let next_index = (game_state.curr_player_index + 1) mod num_players in
@@ -60,3 +50,47 @@ let draw_card game_state =
       game_state.players
   in
   { game_state with players = updated_players; deck = new_deck }
+
+let rec deal_initial_cards game_state num_cards =
+  if num_cards = 0 then game_state
+  else deal_initial_cards (draw_card game_state) (num_cards - 1)
+
+let init_game starting_players =
+  match starting_players with
+  | [] -> failwith "at least 2 players are required"
+  | first_player :: rest ->
+      let initial_state =
+        {
+          players = starting_players;
+          curr_player_index = 0;
+          deck = shuffle_deck (init_deck ());
+        }
+      in
+      (* Deal 5 cards to each player *)
+      let rec deal_to_all_players state players =
+        match players with
+        | [] -> state
+        | player :: rest ->
+            (* Deal 5 cards to current player *)
+            let state_after_cards = deal_initial_cards state 5 in
+            (* Move to next player *)
+            let next_player_state =
+              {
+                state_after_cards with
+                curr_player_index =
+                  (state_after_cards.curr_player_index + 1)
+                  mod List.length starting_players;
+              }
+            in
+            deal_to_all_players next_player_state rest
+      in
+      (* Deal cards and reset to first player *)
+      let final_state = deal_to_all_players initial_state starting_players in
+      { final_state with curr_player_index = 0 }
+
+(* Implement the accessor functions *)
+let get_current_player game_state =
+  List.nth game_state.players game_state.curr_player_index
+
+let get_players game_state = game_state.players
+let get_current_player_index game_state = game_state.curr_player_index
