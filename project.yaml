@@ -1,0 +1,27 @@
+---
+# Members of your group.
+group:
+  - name: Ruth Taddesse
+    netid: ryt5
+  - name: Temi Adebowale
+    netid: ta375
+  - name: Charles Liggins
+    netid: am3327
+  - name: Celeste Naughton 
+    netid: can82
+  - name: Naomi Naranjo
+    netid: nsn25
+# Your PM.
+pm:
+  name: Sahil Hosalli 
+  netid: sh2276
+# Set to false if you don't want your gallery entry to be public.
+publish: true
+# Pithy title
+title: ""
+# OK if this is a Cornell Github link, but public gallery viewers won't be able to see it.
+git-repo: "https://github.com/ruthyt23/cs3110-final-project"
+# Replace the URL with your own demo video.
+demo-video-url: ""
+# Write a short, attention-grabbing description of your project.
+desc: >
