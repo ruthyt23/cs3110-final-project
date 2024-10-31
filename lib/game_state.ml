@@ -17,9 +17,11 @@ let check_win_condition player =
   properties_count >= 3
 
 let play_card game_state player card =
+  let player_without_card = remove_from_hand player card in
+
   match card with
   | Money amount ->
-      let updated_player = bank_money player amount in
+      let updated_player = bank_money player_without_card amount in
       let updated_players =
         List.map
           (fun p -> if get_name p = get_name player then updated_player else p)
@@ -27,14 +29,16 @@ let play_card game_state player card =
       in
       { game_state with players = updated_players }
   | Property (color, property_name) ->
-      let updated_player = add_property player (color, property_name) in
+      let updated_player =
+        add_property player_without_card (color, property_name)
+      in
       let updated_players =
         List.map
           (fun p -> if get_name p = get_name player then updated_player else p)
           game_state.players
       in
       { game_state with players = updated_players }
-  | _ -> failwith "havent done that card type yet"
+  | _ -> failwith "Action card handling not yet implemented"
 
 let draw_card game_state =
   let card, new_deck = draw_card game_state.deck in
