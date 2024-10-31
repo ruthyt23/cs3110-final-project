@@ -6,7 +6,7 @@ group:
   - name: Temi Adebowale
     netid: ta375
   - name: Charles Liggins
-    netid: am3327
+    netid: cll258
   - name: Celeste Naughton 
     netid: can82
   - name: Naomi Naranjo
@@ -17,11 +17,16 @@ pm:
   netid: sh2276
 # Set to false if you don't want your gallery entry to be public.
 publish: true
-# Pithy title
-title: ""
+# Pithy title [TODO]
+title: "" 
 # OK if this is a Cornell Github link, but public gallery viewers won't be able to see it.
 git-repo: "https://github.com/ruthyt23/cs3110-final-project"
 # Replace the URL with your own demo video.
 demo-video-url: ""
 # Write a short, attention-grabbing description of your project.
 desc: >
+  Our project recreates the functionality and excitment of Monopoly Deal with 
+  Ocaml. Players can draw and play various card types, including properties, money, 
+  and action cards that enable interactions between players, such as stealing or swapping 
+  properties, and collecting or paying debts. We abide by all the rules of the traditional 
+  Monopoly Deal game, and allow for support for up to 5 players. 
