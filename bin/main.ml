@@ -28,6 +28,19 @@ let get_card_choice hand =
   print_string "Choose a card to play (enter number) or -1 to skip: ";
   read_int ()
 
+let print_game_state game_state =
+  let players = Game_state.get_players game_state in
+  List.iter
+    (fun player ->
+      Printf.printf "\n=== %s's Table ===\n" (Player.get_name player);
+      Printf.printf "Bank: $%dM\n" (Player.get_bank player);
+      Printf.printf "Properties:\n";
+      List.iter
+        (fun (color, name) -> Printf.printf "  %s - %s\n" color name)
+        (Player.get_properties player))
+    players;
+  print_endline ""
+
 let rec play_cards_phase game_state cards_played =
   (* Check if player has already played maximum number of cards *)
   if cards_played >= 3 then (
@@ -38,8 +51,11 @@ let rec play_cards_phase game_state cards_played =
     let current_player = Game_state.get_current_player game_state in
     let current_hand = Player.get_hand current_player in
 
-    (* Display current game information to player *)
-    print_endline "\nCurrent hand:";
+    (* Display current game state *)
+    print_game_state game_state;
+
+    (* Display current hand *)
+    print_endline "\nYour hand:";
     print_hand current_hand;
     Printf.printf "\nYou can play %d more cards this turn.\n" (3 - cards_played);
     print_endline "Would you like to play a card? (y/n)";
