@@ -25,7 +25,16 @@ let get_bank player = player.bank
 let get_properties player = player.properties
 
 let remove_from_hand player card =
-  { player with hand = List.filter (( <> ) card) player.hand }
+  let count = ref 0 in
+  {
+    player with
+    hand =
+      List.filter
+        (fun current_card ->
+          if current_card = card then count := !count + 1;
+          current_card <> card || !count > 1)
+        player.hand;
+  }
 
 let get_property_sets player =
   let property_sets =
