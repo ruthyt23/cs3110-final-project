@@ -21,6 +21,8 @@ let remove_property player property =
 
 let get_name player = player.name
 let get_hand player = player.hand
+let get_bank player = player.bank
+let get_properties player = player.properties
 
 let remove_from_hand player card =
   { player with hand = List.filter (( <> ) card) player.hand }

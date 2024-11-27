@@ -36,3 +36,9 @@ val get_property_sets : player -> int
 
 val get_hand : player -> Deck.card list
 (** [get_hand player] returns the list of cards currently in the player's hand *)
+
+val get_bank : player -> int
+(** [get_bank player] returns the amount of money in the player's bank *)
+
+val get_properties : player -> (string * string) list
+(** [get_properties player] returns the list of properties the player owns *)
