@@ -41,15 +41,27 @@ let pass_go player card_lst =
   let add_snd_card_player =
     Player.add_to_hand add_fst_card_player (List.hd snd_card_lst)
   in
-  add_snd_card_player
+  (add_snd_card_player, List.tl snd_card_lst)
 
 (** [its_my_birthday] player pl_lst Gives [player] two dollars from everyone's
     deck who's amount is >=0 and then removes 2 dollars from each player in
     [pl_lst] *)
+
+(* let its_my_birthday player pl_lst = let remv_pl = List.filter (fun elem ->
+   elem <> player) pl_lst in let upd_player = Player.bank_money player
+   (List.length pl_lst * 2) in let new_pl_lst = List.map (fun player ->
+   Player.remove_from_bank player 2) remv_pl in List.cons upd_player
+   new_pl_lst *)
+
 let its_my_birthday player pl_lst =
-  let remv_pl = List.filter (fun elem -> elem <> player) pl_lst in
-  let upd_player = Player.bank_money player (List.length pl_lst * 2) in
-  let new_pl_lst =
-    List.map (fun player -> Player.remove_from_bank player 2) remv_pl
+  let updated_other_players =
+    List.map
+      (fun p -> if p <> player then Player.remove_from_bank p 2 else p)
+      pl_lst
   in
-  List.cons upd_player new_pl_lst
+  let updated_player =
+    Player.bank_money player ((List.length pl_lst - 1) * 2)
+  in
+  List.map
+    (fun p -> if p = player then updated_player else p)
+    updated_other_players

@@ -66,19 +66,15 @@ let rec play_cards_phase game_state cards_played =
         let card_index = get_card_choice current_hand in
 
         (* Validate card choice and play the card *)
-        if card_index >= 0 && card_index < List.length current_hand then (
+        if card_index >= 0 && card_index < List.length current_hand then
           let chosen_card = List.nth current_hand card_index in
           match chosen_card with
-          | Money _ | Property _ ->
+          | Money _ | Property _ | Action _ ->
               (* Play the card and recursively continue the play phase *)
               let updated_state =
                 play_card game_state current_player chosen_card
               in
               play_cards_phase updated_state (cards_played + 1)
-          | Action _ ->
-              (* Action cards not implemented yet, don't count as a play *)
-              print_endline "Action cards not implemented yet";
-              play_cards_phase game_state cards_played)
         else
           (* Invalid card index, retry without counting as a play *)
           play_cards_phase game_state cards_played
