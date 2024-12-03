@@ -99,9 +99,9 @@ let init_deck () =
       Action "Debt Collector";
       Action "Debt Collector";
       (* 3 It's My Birthday cards *)
-      Action "It’s My Birthday";
-      Action "It’s My Birthday";
-      Action "It’s My Birthday";
+      Action "It's My Birthday";
+      Action "It's My Birthday";
+      Action "It's My Birthday";
       (* 10 Pass Go cards *)
       Action "Pass Go";
       Action "Pass Go";

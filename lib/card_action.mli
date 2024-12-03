@@ -19,7 +19,7 @@ val debt_collector : player -> player -> int -> player * player
 (** [debt_collector player1 player2 debt] forces [player1] to pay [debt] to
     [player2]. *)
 
-val pass_go : player -> card list -> player
+val pass_go : player -> card list -> player * card list
 (** [pass_go player1 deck] allows [player1] to draw two cards from [deck]. *)
 
 val its_my_birthday : player -> player list -> player list
