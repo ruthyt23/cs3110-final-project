@@ -33,8 +33,8 @@ let print_game_state game_state =
   List.iter
     (fun player ->
       Printf.printf "\n=== %s's Table ===\n" (Player.get_name player);
-      Printf.printf "Bank: $%dM\n" (Player.get_bank player);
-      Printf.printf "Properties:\n";
+      Printf.printf "💰 Bank: $%dM\n" (Player.get_bank player);
+      Printf.printf "🏠 Properties:\n";
       List.iter
         (fun (color, name) -> Printf.printf "  %s - %s\n" color name)
         (Player.get_properties player))
@@ -81,18 +81,29 @@ let rec play_cards_phase game_state cards_played =
     (* If player doesn't want to play a card, end the play phase *)
     | _ -> game_state
 
+let create_box message =
+  let box_width = 40 in
+  let emoji_width = 2 in
+  (* Assume each emoji is 2 characters wide *)
+  let msg_len = String.length message - (2 * emoji_width) in
+  let padding = (box_width - msg_len) / 2 in
+  let left_padding = String.make padding ' ' in
+  let right_padding = String.make (box_width - msg_len - padding) ' ' in
+
+  Printf.printf "\n\n+%s+\n" (String.make box_width '-');
+  Printf.printf "|%s%s%s|\n" left_padding message right_padding;
+  Printf.printf "+%s+\n\n" (String.make box_width '-')
+
 let play_turn game_state =
   let current_player = Game_state.get_current_player game_state in
-  Printf.printf "\n=== %s's turn ===\n" (get_name current_player);
+  let name = get_name current_player in
+  let message = Printf.sprintf "🎮 %s's Turn 🎮" name in
+  create_box message;
 
   (* Draw two cards *)
   print_endline "\nDrawing 2 cards...";
   let state_after_draws = Game_state.draw_card game_state in
   let final_draw_state = Game_state.draw_card state_after_draws in
-
-  (* (* Show current hand *) let current_player_updated =
-     Game_state.get_current_player final_draw_state in print_endline "\nYour
-     current hand:"; print_hand (get_hand current_player_updated); *)
 
   (* Play up to 3 cards phase *)
   let final_state = play_cards_phase final_draw_state 0 in
@@ -130,7 +141,7 @@ let main () =
     let rec init_players n acc =
       if n = 0 then acc
       else (
-        Printf.printf "Enter name for Player %d" (num_players - n + 1);
+        Printf.printf "Enter name for Player %d: " (num_players - n + 1);
         let player_name = read_line () in
         let player = Player.init_player player_name in
         init_players (n - 1) (player :: acc))
