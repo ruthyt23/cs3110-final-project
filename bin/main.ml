@@ -121,21 +121,27 @@ let rec game_loop game_state =
 let main () =
   print_endline "Welcome to Monopoly Deal!\n";
 
-  (* Initialize players *)
-  print_string "Enter name for Player 1: ";
-  let player1_name = read_line () in
-  print_string "Enter name for Player 2: ";
-  let player2_name = read_line () in
+  print_string "Enter number of players (2-5): ";
+  let num_players = read_int () in
+  if num_players < 2 || num_players > 5 then
+    failwith "Number of players must be between 2 and 5"
+  else
+    (* Initialize players *)
+    let rec init_players n acc =
+      if n = 0 then acc
+      else (
+        Printf.printf "Enter name for Player %d" (num_players - n + 1);
+        let player_name = read_line () in
+        let player = Player.init_player player_name in
+        init_players (n - 1) (player :: acc))
+    in
+    let players = init_players num_players [] in
 
-  let player1 = Player.init_player player1_name in
-  let player2 = Player.init_player player2_name in
+    let initial_state = Game_state.init_game players in
 
-  (* Initialize game state *)
-  let initial_state = Game_state.init_game [ player1; player2 ] in
-
-  (* Start game loop *)
-  print_endline "\nGame starting...\n";
-  game_loop initial_state
+    (* Start game loop *)
+    print_endline "\nGame starting...\n";
+    game_loop initial_state
 ;;
 
 main ()
