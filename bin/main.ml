@@ -1,6 +1,6 @@
 open Project3110
 open Player
-open Game_state
+open GameState
 open Deck
 
 let rec print_hand cards =
@@ -29,7 +29,7 @@ let get_card_choice hand =
   read_int ()
 
 let print_game_state game_state =
-  let players = Game_state.get_players game_state in
+  let players = GameState.get_players game_state in
   List.iter
     (fun player ->
       Printf.printf "\n=== %s's Table ===\n" (Player.get_name player);
@@ -48,7 +48,7 @@ let rec play_cards_phase game_state cards_played =
     game_state)
   else
     (* Get current player and their hand *)
-    let current_player = Game_state.get_current_player game_state in
+    let current_player = GameState.get_current_player game_state in
     let current_hand = Player.get_hand current_player in
 
     (* Display current game state *)
@@ -82,16 +82,16 @@ let rec play_cards_phase game_state cards_played =
     | _ -> game_state
 
 let play_turn game_state =
-  let current_player = Game_state.get_current_player game_state in
+  let current_player = GameState.get_current_player game_state in
   Printf.printf "\n=== %s's turn ===\n" (get_name current_player);
 
   (* Draw two cards *)
   print_endline "\nDrawing 2 cards...";
-  let state_after_draws = Game_state.draw_card game_state in
-  let final_draw_state = Game_state.draw_card state_after_draws in
+  let state_after_draws = GameState.draw_card game_state in
+  let final_draw_state = GameState.draw_card state_after_draws in
 
   (* (* Show current hand *) let current_player_updated =
-     Game_state.get_current_player final_draw_state in print_endline "\nYour
+     GameState.get_current_player final_draw_state in print_endline "\nYour
      current hand:"; print_hand (get_hand current_player_updated); *)
 
   (* Play up to 3 cards phase *)
@@ -102,10 +102,10 @@ let play_turn game_state =
 
 let rec game_loop game_state =
   (* Get current player *)
-  let current_player = Game_state.get_current_player game_state in
+  let current_player = GameState.get_current_player game_state in
 
   (* Check win condition before the turn *)
-  if Game_state.check_win_condition current_player then (
+  if GameState.check_win_condition current_player then (
     Printf.printf "\n🎉 %s wins! 🎉\n" (Player.get_name current_player);
     Printf.printf "They collected 3 full property sets!\n")
   else
@@ -137,7 +137,7 @@ let main () =
     in
     let players = init_players num_players [] in
 
-    let initial_state = Game_state.init_game players in
+    let initial_state = GameState.init_game players in
 
     (* Start game loop *)
     print_endline "\nGame starting...\n";
