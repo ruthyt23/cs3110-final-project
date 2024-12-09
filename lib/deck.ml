@@ -140,4 +140,4 @@ let shuffle_deck deck =
   let sorted_deck = List.sort compare new_deck in
   List.map (fun (_, card) -> card) sorted_deck
 
-let discard_pile 
+let discard_pile deck = failwith "unimplemented"
