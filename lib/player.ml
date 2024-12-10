@@ -2,7 +2,7 @@ type player = {
   name : string;
   hand : Deck.card list;
   bank : int;
-  properties : (string * string) list;
+  properties : Deck.card list;
 }
 
 let init_player name = { name; hand = []; bank = 0; properties = [] }
