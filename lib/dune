@@ -1,2 +1,4 @@
 (library
- (name project3110))
+ (name project3110)
+ (instrumentation
+  (backend bisect_ppx)))

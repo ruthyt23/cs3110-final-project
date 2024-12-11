@@ -6,16 +6,25 @@ include Player
 let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
   failwith "todo"
 
-(** [forced_deal pl1 pl2 card1 card2] Forces pl2 to give pl1 the given [card]
-    and returns the tuple (pl1, pl2) with updated properties for each player.
-    Pl2 must have the card given in order for the action.*)
-let forced_deal (pl1 : player) (pl2 : player) (card1 : string * string)
-    (card2 : string * string) : player * player =
-  let pl1_props = Player.add_property pl1 card1 in
-  let pl2_props = Player.add_property pl2 card2 in
-  let new_pl1 = Player.remove_property pl1_props card2 in
-  let new_pl2 = Player.remove_property pl2_props card1 in
-  (new_pl1, new_pl2)
+(** [forced_deal pl1 pl2 p1_gives p2_gives] Forces a property swap:
+    - pl1 gives up [p1_gives] and receives [p2_gives]
+    - pl2 gives up [p2_gives] and receives [p1_gives] Returns (pl1, pl2) with
+      their updated properties. *)
+let forced_deal (pl1 : player) (pl2 : player) (p1_gives : string * string)
+    (p2_gives : string * string) : player * player =
+  (* Remove properties from their original owners *)
+  let pl1_without_property = Player.remove_property pl1 p1_gives in
+  let pl2_without_property = Player.remove_property pl2 p2_gives in
+
+  (* Give each player the property from the other player *)
+  let pl1_with_new_property =
+    Player.add_property pl1_without_property p2_gives
+  in
+  let pl2_with_new_property =
+    Player.add_property pl2_without_property p1_gives
+  in
+
+  (pl1_with_new_property, pl2_with_new_property)
 
 (** [sly_deal pl1 pl2 card] Forces pl2 to give pl1 the given [card] and returns
     the tuple (pl1, pl2) with updated properties for each player. Pl2 must have
