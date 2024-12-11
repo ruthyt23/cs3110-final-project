@@ -14,11 +14,11 @@ let rec add_property player deck =
 let player1 =
   add_property player1_init
     [
-      Property ("Light Blue", "Oriental Avenue");
-      Property ("Light Blue", "Vermont Avenue");
-      Property ("Light Blue", "Connecticut Avenue");
-      Property ("Orange", "St. James Place");
-      Property ("Orange", "Tennessee Avenue");
+      ("Light Blue", "Oriental Avenue");
+      ("Light Blue", "Vermont Avenue");
+      ("Light Blue", "Connecticut Avenue");
+      ("Orange", "St. James Place");
+      ("Orange", "Tennessee Avenue");
     ]
 
 (* Player hand can have no more than 8 cards *)
