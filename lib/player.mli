@@ -9,7 +9,8 @@ val add_to_hand : player -> Deck.card -> player
 
 val remove_from_hand : player -> Deck.card -> player
 (** [remove_from_hand player card] is a player with an updated [hand] that has
-    card removed*)
+    card removed. If the card is not inside the deck the original deck is
+    returned.*)
 
 val bank_money : player -> int -> player
 (** [bank_money player amount] returns a new player with the [amount] added to
