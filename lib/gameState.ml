@@ -67,9 +67,10 @@ let play_card game_state player card =
           let card_to_receive = select_property target_player "steal" in
           let card_to_give = select_property player "give" in
           let updated_player, updated_target_player =
-            forced_deal player_without_card target_player card_to_receive
-              card_to_give
+            forced_deal player_without_card target_player card_to_give
+              card_to_receive
           in
+
           let updated_players =
             List.map
               (fun p ->
