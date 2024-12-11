@@ -56,12 +56,6 @@ let pass_go player card_lst =
     deck who's amount is >=0 and then removes 2 dollars from each player in
     [pl_lst] *)
 
-(* let its_my_birthday player pl_lst = let remv_pl = List.filter (fun elem ->
-   elem <> player) pl_lst in let upd_player = Player.bank_money player
-   (List.length pl_lst * 2) in let new_pl_lst = List.map (fun player ->
-   Player.remove_from_bank player 2) remv_pl in List.cons upd_player
-   new_pl_lst *)
-
 let its_my_birthday player pl_lst =
   let updated_other_players =
     List.map
