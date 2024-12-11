@@ -13,3 +13,5 @@ val draw_card : card list -> card * card list
 
 val shuffle_deck : card list -> card list
 (** [shuffle_deck deck] returns a new shuffled deck. *)
+
+val discard_pile : card list -> card list
