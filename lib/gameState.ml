@@ -1,6 +1,6 @@
 open Deck
 open Player
-open Card_action
+open CardAction
 
 type game_state = {
   players : Player.player list;

@@ -44,6 +44,9 @@ let init_deck () =
       (* util *)
       Property ("Utility", "Electric Company");
       Property ("Utility", "Water Works");
+      (* property wild cards*)
+      Property ("Wild Card", " ");
+      Property ("Wild Card", " ");
     ]
   in
   let money_cards =
@@ -94,7 +97,7 @@ let init_deck () =
       Action "Forced Deal";
       Action "Forced Deal";
       Action "Forced Deal";
-      (* 3 Debt Collector cards *)
+      (* 3 Debt Collector cards x *)
       Action "Debt Collector";
       Action "Debt Collector";
       Action "Debt Collector";
@@ -121,9 +124,13 @@ let init_deck () =
       Action "Hotel";
       Action "Hotel";
       Action "Hotel";
-      (* 2 Double the Rent cards *)
+      (* 2 Double the Rent cards x *)
       Action "Double The Rent";
       Action "Double The Rent";
+      (* 3 Rent Cards*)
+      Action "Wild Rent Card";
+      Action "Wild Rent Card";
+      Action "Wild Rent Card";
     ]
   in
   property_cards @ money_cards @ action_cards
@@ -139,3 +146,5 @@ let shuffle_deck deck =
   let new_deck = List.map (fun c -> (Random.bits (), c)) deck in
   let sorted_deck = List.sort compare new_deck in
   List.map (fun (_, card) -> card) sorted_deck
+
+let discard_pile deck = failwith "unimplemented"
