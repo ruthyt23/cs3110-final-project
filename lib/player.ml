@@ -8,7 +8,10 @@ type player = {
 let init_player name = { name; hand = []; bank = 0; properties = [] }
 let add_to_hand player card = { player with hand = card :: player.hand }
 let bank_money player amount = { player with bank = player.bank + amount }
-let remove_from_bank player amount = { player with bank = player.bank - amount }
+
+let remove_from_bank player amount =
+  if player.bank = 0 then { player with bank = player.bank }
+  else { player with bank = player.bank - amount }
 
 let add_property player property =
   { player with properties = property :: player.properties }
