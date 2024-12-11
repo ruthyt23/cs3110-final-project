@@ -65,12 +65,11 @@ let tests =
          (******************** Deck.mli tests ********************************)
          ("Deck test" >:: fun _ -> assert_equal (List.length test_deck) 89);
          create_test "Testing - draw_card" (List.length new_deck) 82;
+         (******************** Player.mli tests ********************************)
          (******************** init_player tests *****************************)
-         (* 1. Player name is player1 *)
          create_test "Testing Player - init name"
            (Project3110.Player.get_name player1_init)
            "player1";
-         (* 2. Player is initialized with 0 properties *)
          create_test "Testing Player - init properties"
            (Project3110.Player.get_properties player1_init)
            [];
