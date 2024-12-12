@@ -31,6 +31,9 @@ val remove_property : player -> string * string -> player
 val get_name : player -> string
 (** [get_name player] returns the name of the player*)
 
+val property_sets : (string * string list) list
+(** The property sets separated by color/function. *)
+
 val get_property_sets : player -> int
 (** [get_property_sets player] returns the number of full property sets the
     player has *)
