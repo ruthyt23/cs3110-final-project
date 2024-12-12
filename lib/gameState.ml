@@ -111,7 +111,7 @@ let play_card game_state player card test_flag =
           (fun p -> if get_name p = get_name player then updated_player else p)
           game_state.players
       in
-      { game_state with players = updated_players }
+      ({ game_state with players = updated_players }, 0)
   | Property (color, property_name) ->
       let updated_player =
         add_property player_without_card (color, property_name)
@@ -121,7 +121,7 @@ let play_card game_state player card test_flag =
           (fun p -> if get_name p = get_name player then updated_player else p)
           game_state.players
       in
-      { game_state with players = updated_players }
+      ({ game_state with players = updated_players }, 0)
   | Action action -> (
       let updated_discard_pile = card :: game_state.discard_pile in
       match action with
@@ -158,11 +158,12 @@ let play_card game_state player card test_flag =
                 else p)
               game_state.players
           in
-          {
-            game_state with
-            players = updated_players;
-            discard_pile = updated_discard_pile;
-          }
+          ( {
+              game_state with
+              players = updated_players;
+              discard_pile = updated_discard_pile;
+            },
+            0 )
       | "Sly Deal" ->
           let target_player =
             get_target_player game_state.players player test_flag
@@ -182,11 +183,12 @@ let play_card game_state player card test_flag =
                 else p)
               game_state.players
           in
-          {
-            game_state with
-            players = updated_players;
-            discard_pile = updated_discard_pile;
-          }
+          ( {
+              game_state with
+              players = updated_players;
+              discard_pile = updated_discard_pile;
+            },
+            0 )
       | "Debt Collector" ->
           let target_player =
             get_target_player game_state.players player test_flag
@@ -203,20 +205,22 @@ let play_card game_state player card test_flag =
                 else p)
               game_state.players
           in
-          {
-            game_state with
-            players = updated_players;
-            discard_pile = updated_discard_pile;
-          }
+          ( {
+              game_state with
+              players = updated_players;
+              discard_pile = updated_discard_pile;
+            },
+            0 )
       | "It's My Birthday" ->
           let updated_players =
             its_my_birthday player_without_card game_state.players
           in
-          {
-            game_state with
-            players = updated_players;
-            discard_pile = updated_discard_pile;
-          }
+          ( {
+              game_state with
+              players = updated_players;
+              discard_pile = updated_discard_pile;
+            },
+            0 )
       | "Pass Go" ->
           let updated_player, updated_deck =
             pass_go player_without_card game_state.deck
@@ -227,12 +231,13 @@ let play_card game_state player card test_flag =
                 if get_name p = get_name player then updated_player else p)
               game_state.players
           in
-          {
-            game_state with
-            players = updated_players;
-            deck = updated_deck;
-            discard_pile = updated_discard_pile;
-          }
+          ( {
+              game_state with
+              players = updated_players;
+              deck = updated_deck;
+              discard_pile = updated_discard_pile;
+            },
+            0 )
       | "Deal Breaker" ->
           let target_player =
             get_target_player game_state.players player false
@@ -240,7 +245,7 @@ let play_card game_state player card test_flag =
           let target_color = select_color target_player in
           if target_color = "" then (
             print_string "The chosen player has no properties. Sorry!\n";
-            game_state)
+            (game_state, 0))
           else if
             Deck.property_count
               (Player.get_properties target_player)
@@ -249,7 +254,7 @@ let play_card game_state player card test_flag =
           then (
             print_string
               ("The " ^ target_color ^ " set hasn't been complete yet. Sorry!\n");
-            game_state)
+            (game_state, 0))
           else
             let _, prop_list =
               List.hd
@@ -271,12 +276,12 @@ let play_card game_state player card test_flag =
                   else p)
                 game_state.players
             in
-            { game_state with players = updated_players }
+            ({ game_state with players = updated_players }, 0)
       | "Wild Rent Card" ->
           if List.length (get_properties player_without_card) = 0 then (
             print_string
               "You currently don't have any properties to charge rent on. Sorry!\n";
-            game_state)
+            (game_state, 0))
           else
             let rec double_rent_check player loop_num =
               let double_rent_card_check =
@@ -319,7 +324,8 @@ let play_card game_state player card test_flag =
                   else p)
                 game_state.players
             in
-            { game_state with players = updated_players }
+            ( { game_state with players = updated_players },
+              if mult > 1 then mult / 2 else 0 )
       (* | "House" -> if get_property_sets player_without_card = 0 then (
          print_string "You currently don't have a complete property set.
          Sorry!\n"; game_state) else let target_player = get_target_player

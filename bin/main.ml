@@ -86,10 +86,11 @@ let rec play_cards_phase game_state cards_played =
           match chosen_card with
           | Money _ | Property _ | Action _ ->
               (* Play the card and recursively continue the play phase *)
-              let updated_state =
+              let updated_state, additional_cards_played =
                 play_card game_state current_player chosen_card false
               in
-              play_cards_phase updated_state (cards_played + 1)
+              play_cards_phase updated_state
+                (cards_played + 1 + additional_cards_played)
         else
           (* Invalid card index, retry without counting as a play *)
           play_cards_phase game_state cards_played
