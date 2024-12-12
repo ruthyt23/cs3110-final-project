@@ -94,6 +94,28 @@ let create_box message =
   Printf.printf "|%s%s%s|\n" left_padding message right_padding;
   Printf.printf "+%s+\n\n" (String.make box_width '-')
 
+let rec discard_excess_cards game_state cards_discarded =
+  let current_player = GameState.get_current_player game_state in
+  let current_hand = Player.get_hand current_player in
+  let hand_size = List.length current_hand in
+  if hand_size <= 7 then game_state
+  else (
+    print_string "Choose a card to discard (enter number): ";
+    match read_int_opt () with
+    | Some discard_index when discard_index >= 0 && discard_index < hand_size ->
+        let card_to_remove =
+          List.nth current_hand (discard_index - cards_discarded)
+        in
+
+        let updated_state =
+          discard_card game_state current_player card_to_remove
+        in
+        let new_cards_discarded = cards_discarded + 1 in
+        discard_excess_cards updated_state new_cards_discarded
+    | _ ->
+        print_endline "Invalid choice. Please try again.";
+        discard_excess_cards game_state cards_discarded)
+
 let play_turn game_state =
   let current_player = GameState.get_current_player game_state in
   let name = get_name current_player in
@@ -110,10 +132,29 @@ let play_turn game_state =
      current hand:"; print_hand (get_hand current_player_updated); *)
 
   (* Play up to 3 cards phase *)
-  let final_state = play_cards_phase final_draw_state 0 in
+  let new_state = play_cards_phase final_draw_state 0 in
 
-  (* End turn *)
-  next_turn final_state
+  let new_current_player = GameState.get_current_player new_state in
+  let current_hand = Player.get_hand new_current_player in
+  let hand_size = List.length current_hand in
+  if hand_size <= 7 then next_turn new_state
+  else (
+    Printf.printf "\nYou have %d cards in your hand. Please discard %d cards.\n"
+      hand_size (hand_size - 7);
+    List.iteri
+      (fun i card ->
+        Printf.printf "%d: " i;
+        match card with
+        | Money amount -> Printf.printf "Money card: $%dM\n" amount
+        | Property (color, name) ->
+            Printf.printf "Property card: %s - %s\n" color name
+        | Action name -> Printf.printf "Action card: %s\n" name)
+      current_hand;
+
+    let final_state = discard_excess_cards new_state 0 in
+
+    (* End turn *)
+    next_turn final_state)
 
 let rec game_loop game_state =
   (* Get current player *)

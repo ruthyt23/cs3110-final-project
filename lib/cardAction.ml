@@ -1,11 +1,6 @@
 open Deck
 include Player
 
-(** Steal full set of properties from another player based on the color they say
-    they want *)
-let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
-  failwith "todo"
-
 (** [forced_deal pl1 pl2 p1_gives p2_gives] Forces a property swap:
     - pl1 gives up [p1_gives] and receives [p2_gives]
     - pl2 gives up [p2_gives] and receives [p1_gives] Returns (pl1, pl2) with
@@ -68,3 +63,11 @@ let its_my_birthday player pl_lst =
   List.map
     (fun p -> if p = player then updated_player else p)
     updated_other_players
+
+(** Steal full set of properties from another player based on the color they say
+    they want *)
+let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
+  List.fold_left
+    (fun (curr_pl1, curr_pl2) curr_prop ->
+      sly_deal curr_pl1 curr_pl2 (color, curr_prop))
+    (pl1, pl2) prop_lst
