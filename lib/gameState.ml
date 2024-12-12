@@ -145,6 +145,17 @@ let draw_card game_state =
   in
   { game_state with players = updated_players; deck = new_deck }
 
+let discard_card game_state current_player card =
+  let updated_player = remove_from_hand current_player card in
+  let updated_players =
+    List.map
+      (fun player ->
+        if get_name player = get_name current_player then updated_player
+        else player)
+      game_state.players
+  in
+  { game_state with players = updated_players }
+
 let rec deal_initial_cards game_state num_cards =
   if num_cards = 0 then game_state
   else deal_initial_cards (draw_card game_state) (num_cards - 1)
