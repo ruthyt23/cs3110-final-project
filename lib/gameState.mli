@@ -29,3 +29,4 @@ val discard_card : game_state -> Player.player -> Deck.card -> game_state
 val get_current_player : game_state -> Player.player
 val get_players : game_state -> Player.player list
 val get_current_player_index : game_state -> int
+val get_discard : game_state -> Deck.card list
