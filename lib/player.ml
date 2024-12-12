@@ -39,22 +39,20 @@ let remove_from_hand player card =
         player.hand;
   }
 
-let get_property_sets player =
-  let property_sets =
-    [
-      ("Brown", [ "Mediterranean Avenue"; "Baltic Avenue" ]);
-      ( "Light Blue",
-        [ "Oriental Avenue"; "Vermont Avenue"; "Connecticut Avenue" ] );
-      ("Pink", [ "St. Charles Place"; "States Avenue"; "Virginia Avenue" ]);
-      ("Orange", [ "St. James Place"; "Tennessee Avenue"; "New York Avenue" ]);
-      ("Red", [ "Kentucky Avenue"; "Indiana Avenue"; "Illinois Avenue" ]);
-      ("Yellow", [ "Atlantic Avenue"; "Ventnor Avenue"; "Marvin Gardens" ]);
-      ( "Green",
-        [ "Pacific Avenue"; "North Carolina Avenue"; "Pennsylvania Avenue" ] );
-      ("Dark Blue", [ "Park Place"; "Boardwalk" ]);
-    ]
-  in
+let property_sets =
+  [
+    ("Brown", [ "Mediterranean Avenue"; "Baltic Avenue" ]);
+    ("Light Blue", [ "Oriental Avenue"; "Vermont Avenue"; "Connecticut Avenue" ]);
+    ("Pink", [ "St. Charles Place"; "States Avenue"; "Virginia Avenue" ]);
+    ("Orange", [ "St. James Place"; "Tennessee Avenue"; "New York Avenue" ]);
+    ("Red", [ "Kentucky Avenue"; "Indiana Avenue"; "Illinois Avenue" ]);
+    ("Yellow", [ "Atlantic Avenue"; "Ventnor Avenue"; "Marvin Gardens" ]);
+    ( "Green",
+      [ "Pacific Avenue"; "North Carolina Avenue"; "Pennsylvania Avenue" ] );
+    ("Dark Blue", [ "Park Place"; "Boardwalk" ]);
+  ]
 
+let get_property_sets player =
   List.fold_left
     (fun count (color, props) ->
       if
@@ -64,3 +62,6 @@ let get_property_sets player =
       then count + 1
       else count)
     0 property_sets
+
+let card_count player card = List.length (List.filter (( = ) card) player.hand)
+let card_check player card = card_count player card > 0

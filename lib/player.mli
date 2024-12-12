@@ -31,6 +31,9 @@ val remove_property : player -> string * string -> player
 val get_name : player -> string
 (** [get_name player] returns the name of the player*)
 
+val property_sets : (string * string list) list
+(** The property sets separated by color/function. *)
+
 val get_property_sets : player -> int
 (** [get_property_sets player] returns the number of full property sets the
     player has *)
@@ -43,3 +46,9 @@ val get_bank : player -> int
 
 val get_properties : player -> (string * string) list
 (** [get_properties player] returns the list of properties the player owns *)
+
+val card_count : player -> Deck.card -> int
+(** [card_count player card] returns the number of [card]s that [player] has. *)
+
+val card_check : player -> Deck.card -> bool
+(** [card_check player card] checks if [player] has at least one of [card]. *)
