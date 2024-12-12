@@ -47,6 +47,8 @@ val get_bank : player -> int
 val get_properties : player -> (string * string) list
 (** [get_properties player] returns the list of properties the player owns *)
 
-val hand_check : player -> Deck.card -> bool
-(** [just_say_no_hand_check player card] checks if the player has at least one
-    of [card]*)
+val card_count : player -> Deck.card -> int
+(** [card_count player card] returns the number of [card]s that [player] has. *)
+
+val card_check : player -> Deck.card -> bool
+(** [card_check player card] checks if [player] has at least one of [card]. *)

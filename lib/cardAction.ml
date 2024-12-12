@@ -72,10 +72,10 @@ let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
       sly_deal curr_pl1 curr_pl2 (color, curr_prop))
     (pl1, pl2) prop_lst
 
-let charge_rent pl1 pl2 color =
+let charge_rent pl1 pl2 color mult =
   let count = property_count (get_properties pl1) color in
   let rent_charges = Deck.property_rent color in
-  let rent_amt = List.nth rent_charges (count - 1) in
+  let rent_amt = List.nth rent_charges (count - 1) * mult in
   print_string
-    ("Rent of " ^ string_of_int rent_amt ^ "charged to " ^ get_name pl2);
+    ("Rent of $" ^ string_of_int rent_amt ^ "M charged to " ^ get_name pl2);
   debt_collector pl1 pl2 rent_amt

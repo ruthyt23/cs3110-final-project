@@ -178,3 +178,4 @@ let property_rent = function
   | _ -> []
 
 let just_say_no = Action "Just Say No"
+let double_the_rent = Action "Double the Rent"
