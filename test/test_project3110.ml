@@ -248,7 +248,7 @@ let game_state_tests =
       false;
     (* Play Card Tests *)
     create_test "Play money card - increases bank"
-      (let game_with_money =
+      (let game_with_money, _ =
          Project3110.GameState.play_card initial_game
            (Project3110.GameState.get_current_player initial_game)
            (Money 5) true
@@ -257,7 +257,7 @@ let game_state_tests =
          (Project3110.GameState.get_current_player game_with_money))
       5;
     create_test "Play property card - adds to properties"
-      (let game_with_property =
+      (let game_with_property, _ =
          Project3110.GameState.play_card initial_game
            (Project3110.GameState.get_current_player initial_game)
            (Property ("Brown", "Mediterranean Avenue"))
@@ -293,7 +293,7 @@ let game_state_tests =
        let game_with_props =
          Project3110.GameState.init_game [ p1_with_props; p2_with_props ]
        in
-       let game_after_action =
+       let game_after_action, _ =
          Project3110.GameState.play_card game_with_props p1_with_props
            (Action "Forced Deal") true
        in
@@ -308,7 +308,7 @@ let game_state_tests =
        let game_with_props =
          Project3110.GameState.init_game [ p1_with_props; p2_with_props ]
        in
-       let game_after_action =
+       let game_after_action, _ =
          Project3110.GameState.play_card game_with_props p1_with_props
            (Action "Sly Deal") true
        in
@@ -323,7 +323,7 @@ let game_state_tests =
        let game_with_money =
          Project3110.GameState.init_game [ p1_with_money; p2_with_money ]
        in
-       let game_after_action =
+       let game_after_action, _ =
          Project3110.GameState.play_card game_with_money p1_with_money
            (Action "Debt Collector") true
        in
@@ -338,7 +338,7 @@ let game_state_tests =
          Project3110.GameState.init_game
            [ p1_with_money; p2_with_money; p3_with_money ]
        in
-       let game_after_action =
+       let game_after_action, _ =
          Project3110.GameState.play_card game_with_money
            (Project3110.GameState.get_current_player game_with_money)
            (Action "It's My Birthday") true
@@ -347,7 +347,7 @@ let game_state_tests =
          (Project3110.GameState.get_current_player game_after_action))
       14;
     create_test "Play action card - Pass Go"
-      (let game_after_action =
+      (let game_after_action, _ =
          Project3110.GameState.play_card initial_game
            (Project3110.GameState.get_current_player initial_game)
            (Action "Pass Go") true
