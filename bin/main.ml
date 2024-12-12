@@ -72,7 +72,7 @@ let rec play_cards_phase game_state cards_played =
           | Money _ | Property _ | Action _ ->
               (* Play the card and recursively continue the play phase *)
               let updated_state =
-                play_card game_state current_player chosen_card
+                play_card game_state current_player chosen_card false
               in
               play_cards_phase updated_state (cards_played + 1)
         else

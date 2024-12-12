@@ -76,6 +76,31 @@ let add_test_properties player =
 let create_test test_name input output =
   test_name >:: fun _ -> assert_equal input output
 
+let bool_printer = function
+  | true -> "true"
+  | false -> "false"
+
+let int_printer x = string_of_int x
+
+let create_test2 test_name input output =
+  test_name >:: fun _ -> assert_equal input output ~printer:int_printer
+
+let string_printer x = x
+
+(* Additional printer functions *)
+let card_printer = function
+  | Money n -> "Money " ^ string_of_int n
+  | Property (color, name) -> "Property (" ^ color ^ ", " ^ name ^ ")"
+  | Action name -> "Action " ^ name
+
+let property_printer (color, name) = "(" ^ color ^ ", " ^ name ^ ")"
+
+let list_printer element_printer lst =
+  "[" ^ String.concat "; " (List.map element_printer lst) ^ "]"
+
+let card_list_printer = list_printer card_printer
+let property_list_printer = list_printer property_printer
+
 let test_has_property test_name player property expected =
   create_test test_name
     (List.mem property (Project3110.Player.get_properties player))
@@ -226,7 +251,7 @@ let game_state_tests =
       (let game_with_money =
          Project3110.GameState.play_card initial_game
            (Project3110.GameState.get_current_player initial_game)
-           (Money 5)
+           (Money 5) true
        in
        Project3110.Player.get_bank
          (Project3110.GameState.get_current_player game_with_money))
@@ -236,6 +261,7 @@ let game_state_tests =
          Project3110.GameState.play_card initial_game
            (Project3110.GameState.get_current_player initial_game)
            (Property ("Brown", "Mediterranean Avenue"))
+           true
        in
        List.mem
          ("Brown", "Mediterranean Avenue")
@@ -261,12 +287,94 @@ let game_state_tests =
             (Project3110.GameState.get_current_player game_after_draw))
        - initial_deck_size)
       1;
+    create_test "Play action card - Forced Deal"
+      (let p1_with_props = add_test_properties p1 in
+       let p2_with_props = add_test_properties p2 in
+       let game_with_props =
+         Project3110.GameState.init_game [ p1_with_props; p2_with_props ]
+       in
+       let game_after_action =
+         Project3110.GameState.play_card game_with_props p1_with_props
+           (Action "Forced Deal") true
+       in
+       List.mem
+         ("Light Blue", "Oriental Avenue")
+         (Project3110.Player.get_properties
+            (Project3110.GameState.get_current_player game_after_action)))
+      true;
+    create_test "Play action card - Sly Deal"
+      (let p1_with_props = add_test_properties p1 in
+       let p2_with_props = add_test_properties p2 in
+       let game_with_props =
+         Project3110.GameState.init_game [ p1_with_props; p2_with_props ]
+       in
+       let game_after_action =
+         Project3110.GameState.play_card game_with_props p1_with_props
+           (Action "Sly Deal") true
+       in
+       List.mem
+         ("Light Blue", "Oriental Avenue")
+         (Project3110.Player.get_properties
+            (Project3110.GameState.get_current_player game_after_action)))
+      true;
+    create_test "Play action card - Debt Collector"
+      (let p1_with_money = bank_money p1 10 in
+       let p2_with_money = bank_money p2 10 in
+       let game_with_money =
+         Project3110.GameState.init_game [ p1_with_money; p2_with_money ]
+       in
+       let game_after_action =
+         Project3110.GameState.play_card game_with_money p1_with_money
+           (Action "Debt Collector") true
+       in
+       Project3110.Player.get_bank
+         (Project3110.GameState.get_current_player game_after_action))
+      15;
+    create_test2 "Play action card - It's My Birthday"
+      (let p1_with_money = bank_money p1 10 in
+       let p2_with_money = bank_money p2 10 in
+       let p3_with_money = bank_money p3 10 in
+       let game_with_money =
+         Project3110.GameState.init_game
+           [ p1_with_money; p2_with_money; p3_with_money ]
+       in
+       let game_after_action =
+         Project3110.GameState.play_card game_with_money
+           (Project3110.GameState.get_current_player game_with_money)
+           (Action "It's My Birthday") true
+       in
+       Project3110.Player.get_bank
+         (Project3110.GameState.get_current_player game_after_action))
+      14;
+    create_test "Play action card - Pass Go"
+      (let game_after_action =
+         Project3110.GameState.play_card initial_game
+           (Project3110.GameState.get_current_player initial_game)
+           (Action "Pass Go") true
+       in
+       let hand_size =
+         List.length
+           (Project3110.Player.get_hand
+              (Project3110.GameState.get_current_player game_after_action))
+       in
+       hand_size = 6 || hand_size = 7)
+      true;
+    create_test "Play action card - Invalid Action"
+      (try
+         let _ =
+           Project3110.GameState.play_card initial_game p1
+             (Action "Invalid Action") true
+         in
+         false
+       with Failure _ -> true)
+      true;
   ]
 
 let tests =
   [
     (******************** Deck.mli tests ********************************)
-    ("Deck test" >:: fun _ -> assert_equal (List.length test_deck) 89);
+    ( "Deck test" >:: fun _ ->
+      assert_equal (List.length test_deck) 89 ~printer:int_printer );
     create_test "Testing - draw_card" (List.length new_deck) 82;
     (******************** Player.mli tests ********************************)
     (******************** init_player tests *****************************)

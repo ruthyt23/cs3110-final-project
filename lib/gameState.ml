@@ -17,28 +17,44 @@ let check_win_condition player =
   let properties_count = get_property_sets player in
   properties_count >= 3
 
-let get_target_player players current_player =
-  print_endline "\nPlayers:";
-  List.iteri
-    (fun i p ->
-      if get_name p <> get_name current_player then
-        Printf.printf "%d: %s\n" i (get_name p))
-    players;
-  print_string "\nSelect a target player: ";
-  let target_index = int_of_string (read_line ()) in
-  List.nth players target_index
+(* Simple mock inputs for testing *)
+let mock_target_index = ref 1
+let mock_property_index = ref 0
 
-let select_property player prompt =
-  print_endline ("\n" ^ get_name player ^ "'s Properties:");
-  let properties = Player.get_properties player in
-  List.iteri
-    (fun i (color, name) -> Printf.printf "%d: %s %s\n" i color name)
-    properties;
-  print_string ("\nSelect a property to " ^ prompt ^ ": ");
-  let property_index = int_of_string (read_line ()) in
-  List.nth properties property_index
+let get_target_player players current_player test_flag =
+  match test_flag with
+  | true ->
+      (* In test mode, just use the mock index *)
+      List.nth players !mock_target_index
+  | false ->
+      (* Normal gameplay with I/O *)
+      print_endline "\nPlayers:";
+      List.iteri
+        (fun i p ->
+          if get_name p <> get_name current_player then
+            Printf.printf "%d: %s\n" i (get_name p))
+        players;
+      print_string "\nSelect a target player: ";
+      let target_index = int_of_string (read_line ()) in
+      List.nth players target_index
 
-let play_card game_state player card =
+let select_property player prompt test_flag =
+  match test_flag with
+  | true ->
+      (* In test mode, just use the mock index *)
+      List.nth (Player.get_properties player) !mock_property_index
+  | false ->
+      (* Normal gameplay with I/O *)
+      print_endline ("\n" ^ get_name player ^ "'s Properties:");
+      let properties = Player.get_properties player in
+      List.iteri
+        (fun i (color, name) -> Printf.printf "%d: %s %s\n" i color name)
+        properties;
+      print_string ("\nSelect a property to " ^ prompt ^ ": ");
+      let property_index = int_of_string (read_line ()) in
+      List.nth properties property_index
+
+let play_card game_state player card test_flag =
   let player_without_card = remove_from_hand player card in
 
   match card with
@@ -63,9 +79,13 @@ let play_card game_state player card =
   | Action action -> (
       match action with
       | "Forced Deal" ->
-          let target_player = get_target_player game_state.players player in
-          let card_to_receive = select_property target_player "steal" in
-          let card_to_give = select_property player "give" in
+          let target_player =
+            get_target_player game_state.players player test_flag
+          in
+          let card_to_receive =
+            select_property target_player "steal" test_flag
+          in
+          let card_to_give = select_property player "give" test_flag in
           let updated_player, updated_target_player =
             forced_deal player_without_card target_player card_to_give
               card_to_receive
@@ -82,8 +102,12 @@ let play_card game_state player card =
           in
           { game_state with players = updated_players }
       | "Sly Deal" ->
-          let target_player = get_target_player game_state.players player in
-          let card_to_receive = select_property target_player "steal" in
+          let target_player =
+            get_target_player game_state.players player test_flag
+          in
+          let card_to_receive =
+            select_property target_player "steal" test_flag
+          in
           let updated_player, updated_target_player =
             sly_deal player_without_card target_player card_to_receive
           in
@@ -98,7 +122,9 @@ let play_card game_state player card =
           in
           { game_state with players = updated_players }
       | "Debt Collector" ->
-          let target_player = get_target_player game_state.players player in
+          let target_player =
+            get_target_player game_state.players player test_flag
+          in
           let updated_player, updated_target_player =
             debt_collector player_without_card target_player 5
           in

@@ -14,7 +14,7 @@ val check_win_condition : Player.player -> bool
     condition, returns [true] if the player has achieved 3 full property sets,
     [false] otherwise *)
 
-val play_card : game_state -> Player.player -> Deck.card -> game_state
+val play_card : game_state -> Player.player -> Deck.card -> bool -> game_state
 (** [play_card game_state card player] plays the given [card] for the specified
     [player], it returns a new [game_state] with any updates resulting from the
     card effect (e.g., adding properties or banking money), the [card] is
