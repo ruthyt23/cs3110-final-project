@@ -272,6 +272,37 @@ let play_card game_state player card test_flag =
                 game_state.players
             in
             { game_state with players = updated_players }
+      | "Wild Rent Card" ->
+          if List.length (get_properties player_without_card) = 0 then (
+            print_string
+              "You currently don't have any properties to charge rent on. Sorry!\n";
+            game_state)
+          else
+            let color = select_color player_without_card in
+            let target_player =
+              get_target_player game_state.players player false
+            in
+            let updated_player, updated_target_player =
+              charge_rent player_without_card target_player color
+            in
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player
+                  else if get_name p = get_name target_player then
+                    updated_target_player
+                  else p)
+                game_state.players
+            in
+            { game_state with players = updated_players }
+      (* | "House" -> if get_property_sets player_without_card = 0 then (
+         print_string "You currently don't have a complete property set.
+         Sorry!\n"; game_state) else let target_player = get_target_player
+         game_state.players player false in game_state | "Hotel" -> if
+         get_property_sets player_without_card = 0 then ( print_string "You
+         currently don't have a complete property set. Sorry!\n"; game_state)
+         else let target_player = get_target_player game_state.players player
+         false in game_state *)
       | _ -> failwith "not yet implemented")
 
 let draw_card game_state =
