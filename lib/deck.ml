@@ -164,4 +164,17 @@ let property_count prop_list color =
   List.length
     (List.filter (fun (curr_color, _) -> curr_color = color) prop_list)
 
+let property_rent = function
+  | "Brown" -> [ 1; 2 ]
+  | "Light Blue" -> [ 1; 2; 3 ]
+  | "Pink" -> [ 1; 2; 4 ]
+  | "Orange" -> [ 1; 3; 5 ]
+  | "Red" -> [ 2; 3; 6 ]
+  | "Yellow" -> [ 2; 4; 6 ]
+  | "Green" -> [ 2; 4; 7 ]
+  | "Dark Blue" -> [ 3; 8 ]
+  | "Railroad" -> [ 1; 2; 3; 4 ]
+  | "Utility" -> [ 1; 2 ]
+  | _ -> []
+
 let just_say_no = Action "Just Say No"
