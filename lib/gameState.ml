@@ -86,7 +86,7 @@ let select_color player =
     color)
 
 let rec just_say_no_check player1 player2 player1_wants =
-  if Player.hand_check player2 Deck.just_say_no then (
+  if Player.card_check player2 Deck.just_say_no then (
     print_endline
       ("\n" ^ get_name player2
      ^ " has a Just Say No card. Would you like to use it? (y/n)");
@@ -278,12 +278,37 @@ let play_card game_state player card test_flag =
               "You currently don't have any properties to charge rent on. Sorry!\n";
             game_state)
           else
-            let color = select_color player_without_card in
+            let rec double_rent_check player loop_num =
+              let double_rent_card_check =
+                card_count player Deck.double_the_rent
+              in
+              if double_rent_card_check = 0 then (player, 1)
+              else (
+                print_endline
+                  "You have a Double the Rent card. Would you like to use it? \
+                   (y/n)";
+                match read_line () with
+                | "y" ->
+                    let new_player1 =
+                      remove_from_hand player Deck.double_the_rent
+                    in
+                    if double_rent_card_check = 2 then
+                      double_rent_check new_player1 2
+                    else (new_player1, 2 * loop_num)
+                | "n" -> (player, 1)
+                | _ ->
+                    print_endline "Invalid input entered. Try again!";
+                    double_rent_check player 1)
+            in
+            let updated_player1, mult =
+              double_rent_check player_without_card 1
+            in
+            let color = select_color updated_player1 in
             let target_player =
-              get_target_player game_state.players player false
+              get_target_player game_state.players updated_player1 false
             in
             let updated_player, updated_target_player =
-              charge_rent player_without_card target_player color
+              charge_rent updated_player1 target_player color mult
             in
             let updated_players =
               List.map

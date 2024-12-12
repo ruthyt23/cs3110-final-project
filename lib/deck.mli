@@ -26,4 +26,7 @@ val property_rent : string -> int list
 (** [property_rent color] gives the list of rent prices for a given [color].*)
 
 val just_say_no : card
-(** The "Just Say No" action card - used to facilitate exchanges. *)
+(** The "Just Say No" action card - used to facilitate action card exchanges. *)
+
+val double_the_rent : card
+(** The "Double the Rent" action card - used to check during rent charges. *)
