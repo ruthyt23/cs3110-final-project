@@ -146,5 +146,3 @@ let shuffle_deck deck =
   let new_deck = List.map (fun c -> (Random.bits (), c)) deck in
   let sorted_deck = List.sort compare new_deck in
   List.map (fun (_, card) -> card) sorted_deck
-
-let discard_pile deck = failwith "unimplemented"
