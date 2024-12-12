@@ -1,8 +1,7 @@
 open Player
 open Deck
 
-val deal_breaker :
-  player -> player -> (string * string) list -> string -> player * player
+val deal_breaker : player -> player -> string list -> string -> player * player
 (** [deal_breaker player1 player2 properties color] steals a full [color] set of
     [properties] from [player2] and gives it to [player1]. *)
 
