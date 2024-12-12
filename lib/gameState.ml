@@ -6,6 +6,7 @@ type game_state = {
   players : Player.player list;
   curr_player_index : int;
   deck : Deck.card list;
+  discard_pile : Deck.card list;
 }
 
 let next_turn game_state =
@@ -27,6 +28,8 @@ let get_target_player players current_player =
   print_string "\nSelect a target player: ";
   let target_index = int_of_string (read_line ()) in
   List.nth players target_index
+
+let get_discard game_state = game_state.discard_pile
 
 let select_property player prompt =
   print_endline ("\n" ^ get_name player ^ "'s Properties:");
@@ -74,6 +77,7 @@ let play_card game_state player card =
       in
       { game_state with players = updated_players }
   | Action action -> (
+      let updated_discard_pile = card :: game_state.discard_pile in
       match action with
       | "Forced Deal" ->
           let target_player = get_target_player game_state.players player in
@@ -93,7 +97,11 @@ let play_card game_state player card =
                 else p)
               game_state.players
           in
-          { game_state with players = updated_players }
+          {
+            game_state with
+            players = updated_players;
+            discard_pile = updated_discard_pile;
+          }
       | "Sly Deal" ->
           let target_player = get_target_player game_state.players player in
           let card_to_receive = select_property target_player "steal" in
@@ -109,7 +117,11 @@ let play_card game_state player card =
                 else p)
               game_state.players
           in
-          { game_state with players = updated_players }
+          {
+            game_state with
+            players = updated_players;
+            discard_pile = updated_discard_pile;
+          }
       | "Debt Collector" ->
           let target_player = get_target_player game_state.players player in
           let updated_player, updated_target_player =
@@ -124,12 +136,20 @@ let play_card game_state player card =
                 else p)
               game_state.players
           in
-          { game_state with players = updated_players }
+          {
+            game_state with
+            players = updated_players;
+            discard_pile = updated_discard_pile;
+          }
       | "It's My Birthday" ->
           let updated_players =
             its_my_birthday player_without_card game_state.players
           in
-          { game_state with players = updated_players }
+          {
+            game_state with
+            players = updated_players;
+            discard_pile = updated_discard_pile;
+          }
       | "Pass Go" ->
           let updated_player, updated_deck =
             pass_go player_without_card game_state.deck
@@ -140,7 +160,12 @@ let play_card game_state player card =
                 if get_name p = get_name player then updated_player else p)
               game_state.players
           in
-          { game_state with players = updated_players; deck = updated_deck }
+          {
+            game_state with
+            players = updated_players;
+            deck = updated_deck;
+            discard_pile = updated_discard_pile;
+          }
       | "Deal Breaker" ->
           let target_player = get_target_player game_state.players player in
           let target_color = select_color target_player in
@@ -181,11 +206,44 @@ let play_card game_state player card =
       | _ -> failwith "not yet implemented")
 
 let draw_card game_state =
-  let card, new_deck = draw_card game_state.deck in
-  let current_player =
-    List.nth game_state.players game_state.curr_player_index
-  in
-  let updated_player = add_to_hand current_player card in
+  try
+    let card, new_deck = draw_card game_state.deck in
+    let current_player =
+      List.nth game_state.players game_state.curr_player_index
+    in
+    let updated_player = add_to_hand current_player card in
+    let updated_players =
+      List.map
+        (fun player ->
+          if get_name player = get_name current_player then updated_player
+          else player)
+        game_state.players
+    in
+    { game_state with players = updated_players; deck = new_deck }
+  with Failure _ ->
+    let discard_deck = shuffle_deck game_state.discard_pile in
+    let new_discard_pile = [] in
+    let card, new_deck = draw_card discard_deck in
+    let current_player =
+      List.nth game_state.players game_state.curr_player_index
+    in
+    let updated_player = add_to_hand current_player card in
+    let updated_players =
+      List.map
+        (fun player ->
+          if get_name player = get_name current_player then updated_player
+          else player)
+        game_state.players
+    in
+    {
+      game_state with
+      players = updated_players;
+      deck = new_deck;
+      discard_pile = new_discard_pile;
+    }
+
+let discard_card game_state current_player card =
+  let updated_player = remove_from_hand current_player card in
   let updated_players =
     List.map
       (fun player ->
@@ -193,7 +251,12 @@ let draw_card game_state =
         else player)
       game_state.players
   in
-  { game_state with players = updated_players; deck = new_deck }
+  let updated_discard_pile = card :: game_state.discard_pile in
+  {
+    game_state with
+    players = updated_players;
+    discard_pile = updated_discard_pile;
+  }
 
 let rec deal_initial_cards game_state num_cards =
   if num_cards = 0 then game_state
@@ -208,6 +271,7 @@ let init_game starting_players =
           players = starting_players;
           curr_player_index = 0;
           deck = shuffle_deck (init_deck ());
+          discard_pile = [];
         }
       in
       (* Deal 5 cards to each player *)

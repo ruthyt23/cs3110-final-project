@@ -147,8 +147,6 @@ let shuffle_deck deck =
   let sorted_deck = List.sort compare new_deck in
   List.map (fun (_, card) -> card) sorted_deck
 
-let discard_pile deck = failwith "unimplemented"
-
 let full_property_count = function
   | "Brown" -> 2
   | "Light Blue" -> 3
