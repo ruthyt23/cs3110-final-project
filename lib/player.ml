@@ -10,7 +10,7 @@ let add_to_hand player card = { player with hand = card :: player.hand }
 let bank_money player amount = { player with bank = player.bank + amount }
 
 let remove_from_bank player amount =
-  if player.bank = 0 then { player with bank = player.bank }
+  if player.bank < amount then { player with bank = 0 }
   else { player with bank = player.bank - amount }
 
 let add_property player property =

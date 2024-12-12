@@ -33,8 +33,9 @@ let sly_deal pl1 pl2 card =
     pl2 must have a bank amount > 0 and returns the pair (pl1, pl2) with the
     updated bank amounts for each player *)
 let debt_collector pl1 pl2 amount =
-  let upd_pl1 = Player.bank_money pl1 amount in
-  let upd_pl2 = Player.remove_from_bank pl2 amount in
+  let actual_amount = min (Player.get_bank pl2) amount in
+  let upd_pl2 = Player.remove_from_bank pl2 actual_amount in
+  let upd_pl1 = Player.bank_money pl1 actual_amount in
   (upd_pl1, upd_pl2)
 
 (** [pass_go player card_lst ] Gives two cards to the player and removes 2 cards
@@ -52,17 +53,21 @@ let pass_go player card_lst =
     [pl_lst] *)
 
 let its_my_birthday player pl_lst =
-  let updated_other_players =
-    List.map
-      (fun p -> if p <> player then Player.remove_from_bank p 2 else p)
-      pl_lst
+  let total_collected, updated_other_players =
+    List.fold_left
+      (fun (total, acc) p ->
+        if Player.get_name p <> Player.get_name player then
+          let actual_amount = min (Player.get_bank p) 2 in
+          let updated_player = Player.remove_from_bank p actual_amount in
+          (total + actual_amount, updated_player :: acc)
+        else (total, p :: acc))
+      (0, []) pl_lst
   in
-  let updated_player =
-    Player.bank_money player ((List.length pl_lst - 1) * 2)
-  in
+  let updated_player = Player.bank_money player total_collected in
   List.map
-    (fun p -> if p = player then updated_player else p)
-    updated_other_players
+    (fun p ->
+      if Player.get_name p = Player.get_name player then updated_player else p)
+    (List.rev updated_other_players)
 
 (** Steal full set of properties from another player based on the color they say
     they want *)
