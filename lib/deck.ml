@@ -148,3 +148,20 @@ let shuffle_deck deck =
   List.map (fun (_, card) -> card) sorted_deck
 
 let discard_pile deck = failwith "unimplemented"
+
+let full_property_count = function
+  | "Brown" -> 2
+  | "Light Blue" -> 3
+  | "Pink" -> 3
+  | "Orange" -> 3
+  | "Red" -> 3
+  | "Yellow" -> 3
+  | "Green" -> 3
+  | "Dark Blue" -> 3
+  | "Railroad" -> 4
+  | "Utility" -> 2
+  | _ -> 0
+
+let property_count prop_list color =
+  List.length
+    (List.filter (fun (curr_color, _) -> curr_color = color) prop_list)

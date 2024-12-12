@@ -15,3 +15,11 @@ val shuffle_deck : card list -> card list
 (** [shuffle_deck deck] returns a new shuffled deck. *)
 
 val discard_pile : card list -> card list
+
+val full_property_count : string -> int
+(** [full_property_count color] returns the number of cards in a full set of
+    [color] cards.*)
+
+val property_count : (string * string) list -> string -> int
+(** [property_count prop_list color] returns the number of [color] cards in the
+    given [prop_list]. *)

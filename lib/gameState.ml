@@ -38,6 +38,19 @@ let select_property player prompt =
   let property_index = int_of_string (read_line ()) in
   List.nth properties property_index
 
+let select_color player =
+  let properties = Player.get_properties player in
+  if List.is_empty properties then ""
+  else (
+    print_endline ("\n" ^ get_name player ^ "'s Properties:");
+    List.iteri
+      (fun i (color, name) -> Printf.printf "%d: %s %s\n" i color name)
+      properties;
+    print_string "\nSelect a property with the wanted color: ";
+    let property_index = int_of_string (read_line ()) in
+    let color, _ = List.nth properties property_index in
+    color)
+
 let play_card game_state player card =
   let player_without_card = remove_from_hand player card in
 
@@ -128,6 +141,43 @@ let play_card game_state player card =
               game_state.players
           in
           { game_state with players = updated_players; deck = updated_deck }
+      | "Deal Breaker" ->
+          let target_player = get_target_player game_state.players player in
+          let target_color = select_color target_player in
+          if target_color = "" then (
+            print_string "The chosen player has no properties. Sorry!\n";
+            game_state)
+          else if
+            Deck.property_count
+              (Player.get_properties target_player)
+              target_color
+            != Deck.full_property_count target_color
+          then (
+            print_string
+              ("The " ^ target_color ^ " set hasn't been complete yet. Sorry!\n");
+            game_state)
+          else
+            let _, prop_list =
+              List.hd
+                (List.filter
+                   (fun (color, _) -> color = target_color)
+                   Player.property_sets)
+            in
+            let updated_player, updated_target_player =
+              deal_breaker player_without_card target_player prop_list
+                target_color
+            in
+
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player
+                  else if get_name p = get_name target_player then
+                    updated_target_player
+                  else p)
+                game_state.players
+            in
+            { game_state with players = updated_players }
       | _ -> failwith "not yet implemented")
 
 let draw_card game_state =
