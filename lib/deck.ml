@@ -163,3 +163,5 @@ let full_property_count = function
 let property_count prop_list color =
   List.length
     (List.filter (fun (curr_color, _) -> curr_color = color) prop_list)
+
+let just_say_no = Action "Just Say No"

@@ -62,3 +62,6 @@ let get_property_sets player =
       then count + 1
       else count)
     0 property_sets
+
+let hand_check player card =
+  List.length (List.filter (( = ) card) player.hand) > 0

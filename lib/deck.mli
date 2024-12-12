@@ -21,3 +21,6 @@ val full_property_count : string -> int
 val property_count : (string * string) list -> string -> int
 (** [property_count prop_list color] returns the number of [color] cards in the
     given [prop_list]. *)
+
+val just_say_no : card
+(** The "Just Say No" action card - used to facilitate exchanges. *)
