@@ -25,6 +25,7 @@ val draw_card : game_state -> game_state
     [deck], returns a new [game_state] with the drawn card added to the player's
     hand and the [deck] updated accordingly *)
 
+val discard_card : game_state -> Player.player -> Deck.card -> game_state
 val get_current_player : game_state -> Player.player
 val get_players : game_state -> Player.player list
 val get_current_player_index : game_state -> int
