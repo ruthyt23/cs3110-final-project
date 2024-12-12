@@ -25,8 +25,23 @@ let get_card_choice hand =
           Printf.printf "Property card: %s - %s\n" color name
       | Action name -> Printf.printf "Action card: %s\n" name)
     hand;
-  print_string "Choose a card to play (enter number) or -1 to skip: ";
-  read_int ()
+  let rec get_choice () =
+    print_string "Choose a card to play (enter number) or -1 to skip: ";
+    try
+      let choice = read_int () in
+      if choice = -1 || (choice >= 0 && choice < List.length hand) then choice
+      else (
+        print_endline "Invalid card number. Please try again.";
+        get_choice ())
+    with
+    | Failure _ ->
+        print_endline "Please enter a valid number";
+        get_choice ()
+    | End_of_file ->
+        print_endline "\nGame terminated.";
+        exit 0
+  in
+  get_choice ()
 
 let print_game_state game_state =
   let players = GameState.get_players game_state in
@@ -177,27 +192,42 @@ let rec game_loop game_state =
 let main () =
   print_endline "Welcome to Monopoly Deal!\n";
 
-  print_string "Enter number of players (2-5): ";
-  let num_players = read_int () in
-  if num_players < 2 || num_players > 5 then
-    failwith "Number of players must be between 2 and 5"
-  else
-    (* Initialize players *)
-    let rec init_players n acc =
-      if n = 0 then acc
-      else (
-        Printf.printf "Enter name for Player %d: " (num_players - n + 1);
-        let player_name = read_line () in
-        let player = Player.init_player player_name in
-        init_players (n - 1) (player :: acc))
-    in
-    let players = init_players num_players [] in
+  let rec get_num_players () =
+    print_string "Enter number of players (2-5): ";
+    try
+      let num = read_int () in
+      if num < 2 || num > 5 then (
+        print_endline "Number of players must be between 2 and 5";
+        get_num_players ())
+      else num
+    with
+    | Failure _ ->
+        print_endline "Please enter a valid number";
+        print_endline "";
+        get_num_players ()
+    | End_of_file ->
+        print_endline "\nGame terminated.";
+        exit 0
+  in
 
-    let initial_state = GameState.init_game players in
+  let num_players = get_num_players () in
 
-    (* Start game loop *)
-    print_endline "\nGame starting...\n";
-    game_loop initial_state
+  (* Initialize players *)
+  let rec init_players n acc =
+    if n = 0 then acc
+    else (
+      Printf.printf "Enter name for Player %d: " (num_players - n + 1);
+      let player_name = read_line () in
+      let player = Player.init_player player_name in
+      init_players (n - 1) (player :: acc))
+  in
+  let players = init_players num_players [] in
+
+  let initial_state = GameState.init_game players in
+
+  (* Start game loop *)
+  print_endline "\nGame starting...\n";
+  game_loop initial_state
 ;;
 
 main ()

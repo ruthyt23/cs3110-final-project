@@ -35,9 +35,24 @@ let get_target_player players current_player test_flag =
           if get_name p <> get_name current_player then
             Printf.printf "%d: %s\n" i (get_name p))
         players;
-      print_string "\nSelect a target player: ";
-      let target_index = int_of_string (read_line ()) in
-      List.nth players target_index
+      let rec get_target () =
+        print_string "\nSelect a target player: ";
+        try
+          let target_index = int_of_string (read_line ()) in
+          if target_index >= 0 && target_index < List.length players then
+            List.nth players target_index
+          else (
+            print_endline "Invalid player number. Please try again.";
+            get_target ())
+        with
+        | Failure _ ->
+            print_endline "Please enter a valid number";
+            get_target ()
+        | End_of_file ->
+            print_endline "\nGame terminated.";
+            exit 0
+      in
+      get_target ()
 
 let select_property player prompt test_flag =
   match test_flag with
@@ -54,17 +69,8 @@ let select_property player prompt test_flag =
       print_string ("\nSelect a property to " ^ prompt ^ ": ");
       let property_index = int_of_string (read_line ()) in
       List.nth properties property_index
-let get_discard game_state = game_state.discard_pile
 
-let select_property player prompt =
-  print_endline ("\n" ^ get_name player ^ "'s Properties:");
-  let properties = Player.get_properties player in
-  List.iteri
-    (fun i (color, name) -> Printf.printf "%d: %s %s\n" i color name)
-    properties;
-  print_string ("\nSelect a property to " ^ prompt ^ ": ");
-  let property_index = int_of_string (read_line ()) in
-  List.nth properties property_index
+let get_discard game_state = game_state.discard_pile
 
 let select_color player =
   let properties = Player.get_properties player in
@@ -79,7 +85,6 @@ let select_color player =
     let color, _ = List.nth properties property_index in
     color)
 
-let play_card game_state player card =
 let play_card game_state player card test_flag =
   let player_without_card = remove_from_hand player card in
 
@@ -203,7 +208,9 @@ let play_card game_state player card test_flag =
             discard_pile = updated_discard_pile;
           }
       | "Deal Breaker" ->
-          let target_player = get_target_player game_state.players player in
+          let target_player =
+            get_target_player game_state.players player false
+          in
           let target_color = select_color target_player in
           if target_color = "" then (
             print_string "The chosen player has no properties. Sorry!\n";
