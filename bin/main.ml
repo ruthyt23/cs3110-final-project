@@ -501,4 +501,23 @@ let gui_main () =
   Bogue.run board
 ;;
 
-gui_main ()
+let display_welcome_screen () =
+  let message = {|
+  ╔════════════════════════════════════════════════╗
+  ║             Welcome to Monopoly Deal            ║
+  ║                                                ║
+  ║  🎮  A fast-paced card game of property trading ║
+  ║  💰  Collect properties, charge rent, and win!  ║
+  ║  🏆  Be the first to collect 3 full sets       ║
+  ║                                                ║
+  ║         Press Enter to start the game...       ║
+  ╚════════════════════════════════════════════════╝
+  |} in
+  print_endline message;
+  let _ = read_line () in
+  ()
+
+let () =
+  display_welcome_screen ();
+  (* can also run alt_main here, command line version*)
+  gui_main ()

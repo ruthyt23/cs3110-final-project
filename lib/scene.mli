@@ -36,6 +36,19 @@ val create_deck : unit -> Layout.t list
     Layout.t representing all cards in the deck. *)
 
 val card_promise : (string * (int * int * int * int)) Lwt.t ref
+(** [card_promise] is a reference to an Lwt promise that will resolve to a tuple
+    containing a card name and its RGBA color values. Used for handling
+    asynchronous card selection events. *)
+
 val card_resolver : (string * (int * int * int * int)) Lwt.u ref
+(** [card_resolver] is a reference to the resolver for [card_promise]. Used to
+    fulfill the promise when a card selection is made. *)
+
 val popup_active : bool ref
+(** [popup_active] is a reference tracking whether a card selection popup is
+    currently being displayed. Used to prevent multiple popups from appearing
+    simultaneously. *)
+
 val next_card_id : int ref
+(** [next_card_id] is a reference maintaining the next available unique
+    identifier for cards. Incremented each time a new card is created. *)
