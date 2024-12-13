@@ -47,8 +47,20 @@ val get_bank : player -> int
 val get_properties : player -> (string * string) list
 (** [get_properties player] returns the list of properties the player owns *)
 
+val get_house_and_hotel : player -> (string * string) list
+(** [get_house_and_hotel player] returns the list of houses and hotels the
+    player owns. *)
+
 val card_count : player -> Deck.card -> int
 (** [card_count player card] returns the number of [card]s that [player] has. *)
 
 val card_check : player -> Deck.card -> bool
 (** [card_check player card] checks if [player] has at least one of [card]. *)
+
+val add_house : player -> string -> player
+(** [add_house player color] adds a house to [player]'s full [color] property
+    set. *)
+
+val add_hotel : player -> string -> player
+(** [add_hotel player color] adds a hotel to [player]'s full [color] property
+    set. Requires that [color] already has a house present. *)
