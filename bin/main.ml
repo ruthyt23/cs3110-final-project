@@ -528,5 +528,5 @@ let display_welcome_screen () =
 
 let () =
   display_welcome_screen ();
-  (* can also run alt_main here, command line version*)
-  gui_main ()
+  (* can also run gui_main here, gui version*)
+  alt_main ()
