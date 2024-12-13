@@ -24,7 +24,8 @@ val organize_table_cards : L.t list -> L.t
 
 val card_info : (int, string * Layout.t * Draw.color) Hashtbl.t
 (** [card_info ()] returns a hashtable mapping card IDs to tuples containing the
-    card's name, layout, and color. Used for managing card state and properties. *)
+    card's name, layout, and color. Used for managing card state and properties.
+*)
 
 val create_overlapping_cards : Layout.t list -> L.t
 (** [create_overlapping_cards cards] creates a layout where cards partially

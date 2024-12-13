@@ -6,6 +6,13 @@ open Scene
 open Bogue
 open Lwt.Infix
 
+let () =
+  Sys.set_signal Sys.sigint
+    (Sys.Signal_handle
+       (fun _ ->
+         print_endline "\n Qutting Program ...";
+         exit 0))
+
 let card_border =
   Style.(mk_border ~radius:8 (mk_line ~width:20 ~color:(255, 255, 255, 255) ()))
 
@@ -514,4 +521,4 @@ let gui_main () =
   Bogue.run board
 ;;
 
-gui_main ()
+alt_main ()

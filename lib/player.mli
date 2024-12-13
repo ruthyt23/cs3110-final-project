@@ -39,7 +39,8 @@ val get_property_sets : player -> int
     player has *)
 
 val get_hand : player -> Deck.card list
-(** [get_hand player] returns the list of cards currently in the player's hand *)
+(** [get_hand player] returns the list of cards currently in the player's hand
+*)
 
 val get_bank : player -> int
 (** [get_bank player] returns the amount of money in the player's bank *)
