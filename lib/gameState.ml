@@ -136,7 +136,7 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player test_flag
           in
           let new_player1, new_player2, check =
-            just_say_no_check player_without_card target_player true
+            just_say_no_check player_without_card target_player false
           in
           let updated_player, updated_target_player =
             if check then (
