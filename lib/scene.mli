@@ -22,7 +22,7 @@ val organize_table_cards : L.t list -> L.t
     pattern suitable for table display. Returns a single Layout.t containing the
     organized cards. *)
 
-val card_info : (int, string * Layout.t * Draw.color) Hashtbl.t
+val card_info : (int, string * Layout.t * (int * int * int * int)) Hashtbl.t
 (** [card_info ()] returns a hashtable mapping card IDs to tuples containing the
     card's name, layout, and color. Used for managing card state and properties. *)
 
@@ -34,3 +34,8 @@ val create_overlapping_cards : Layout.t list -> L.t
 val create_deck : unit -> Layout.t list
 (** [create_deck ()] creates a new deck of property cards. Returns a list of
     Layout.t representing all cards in the deck. *)
+
+val card_promise : (string * (int * int * int * int)) Lwt.t ref
+val card_resolver : (string * (int * int * int * int)) Lwt.u ref
+val popup_active : bool ref
+val next_card_id : int ref
