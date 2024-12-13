@@ -149,11 +149,10 @@ let play_card game_state player card test_flag =
                 select_property target_player "steal" test_flag
               in
               let card_to_give = select_property player "give" test_flag in
-              let new_player1, new_player2 =
-                forced_deal player_without_card target_player card_to_give
-                  card_to_receive
+              let new_pl1, new_pl2 =
+                forced_deal new_player1 new_player2 card_to_give card_to_receive
               in
-              (new_player1, new_player2)
+              (new_pl1, new_pl2)
           in
           let updated_players =
             List.map
@@ -174,11 +173,20 @@ let play_card game_state player card test_flag =
           let target_player =
             get_target_player game_state.players player test_flag
           in
-          let card_to_receive =
-            select_property target_player "steal" test_flag
+          let new_player1, new_player2, check =
+            just_say_no_check player_without_card target_player false
           in
           let updated_player, updated_target_player =
-            sly_deal player_without_card target_player card_to_receive
+            if check then (
+              print_endline
+                ("\n" ^ get_name target_player
+               ^ " used a Just Say No card - tough luck!");
+              (new_player1, new_player2))
+            else
+              let card_to_receive =
+                select_property target_player "steal" test_flag
+              in
+              sly_deal new_player1 new_player2 card_to_receive
           in
           let updated_players =
             List.map
@@ -199,8 +207,16 @@ let play_card game_state player card test_flag =
           let target_player =
             get_target_player game_state.players player test_flag
           in
+          let new_player1, new_player2, check =
+            just_say_no_check player_without_card target_player false
+          in
           let updated_player, updated_target_player =
-            debt_collector player_without_card target_player 5
+            if check then (
+              print_endline
+                ("\n" ^ get_name target_player
+               ^ " used a Just Say No card - tough luck!");
+              (new_player1, new_player2))
+            else debt_collector new_player1 new_player2 5
           in
           let updated_players =
             List.map
@@ -249,10 +265,18 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player false
           in
           let target_color = select_color target_player in
+          let new_player1, new_player2, check =
+            just_say_no_check player_without_card target_player false
+          in
           let updated_player, updated_target_player =
-            if target_color = "" then (
+            if check then (
+              print_endline
+                ("\n" ^ get_name target_player
+               ^ " used a Just Say No card - tough luck!");
+              (new_player1, new_player2))
+            else if target_color = "" then (
               print_string "The chosen player has no properties. Sorry!\n";
-              (player_without_card, target_player))
+              (new_player1, new_player2))
             else if
               Deck.property_count
                 (Player.get_properties target_player)
@@ -262,7 +286,7 @@ let play_card game_state player card test_flag =
               print_string
                 ("The " ^ target_color
                ^ " set hasn't been complete yet. Sorry!\n");
-              (player_without_card, target_player))
+              (new_player1, new_player2))
             else
               let _, prop_list =
                 List.hd
@@ -270,8 +294,7 @@ let play_card game_state player card test_flag =
                      (fun (color, _) -> color = target_color)
                      Player.property_sets)
               in
-              deal_breaker player_without_card target_player prop_list
-                target_color
+              deal_breaker new_player1 new_player2 prop_list target_color
           in
           let updated_players =
             List.map
@@ -320,10 +343,18 @@ let play_card game_state player card test_flag =
               let target_player =
                 get_target_player game_state.players updated_player1 false
               in
-              let updated_pl1, updated_pl2 =
-                charge_rent updated_player1 target_player color mult
+              let new_player1, new_player2, check =
+                just_say_no_check player_without_card target_player false
               in
-              (updated_pl1, Some updated_pl2, mult)
+              let updated_player, updated_target_player =
+                if check then (
+                  print_endline
+                    ("\n" ^ get_name target_player
+                   ^ " used a Just Say No card - tough luck!");
+                  (new_player1, new_player2))
+                else charge_rent new_player1 new_player2 color mult
+              in
+              (updated_player, Some updated_target_player, mult)
           in
           let updated_players =
             List.map
@@ -408,6 +439,11 @@ let play_card game_state player card test_flag =
               discard_pile = updated_discard_pile;
             },
             0 )
+      | "Just Say No" ->
+          print_string
+            "Please wait to play this card until an action card is played \
+             against you!";
+          (game_state, 0)
       | "Double The Rent" ->
           print_string
             "Please wait to play this card until you play a Rent card!";

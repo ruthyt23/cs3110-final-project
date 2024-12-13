@@ -12,11 +12,11 @@ val forced_deal :
 
 val sly_deal : player -> player -> string * string -> player * player
 (** [sly_deal player1 player2 card] forces [player2] to give [card] to
-    [player2]. *)
+    [player1]. *)
 
 val debt_collector : player -> player -> int -> player * player
-(** [debt_collector player1 player2 debt] forces [player1] to pay [debt] to
-    [player2]. *)
+(** [debt_collector player1 player2 debt] forces [player2] to pay [debt] to
+    [player1]. *)
 
 val pass_go : player -> card list -> player * card list
 (** [pass_go player1 deck] allows [player1] to draw two cards from [deck]. *)
