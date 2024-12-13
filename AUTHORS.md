@@ -1,4 +1,5 @@
 Contributors:
+
 - Temi Adebowale (ta375@cornell.edu)
 - Ruth Taddesse (ryt5@cornell.edu)
 - Naomi Naranjo (nsn25@cornell.edu)

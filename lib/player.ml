@@ -4,6 +4,12 @@ type player = {
   bank : int;
   properties : (string * string) list;
 }
+(** [player] represents a player in the Monopoly Deal game. It contains:
+    - The player's name
+    - Their current hand of cards
+    - Their bank balance
+    - A list of properties they own Representation Invariant: bank must be
+      non-negative *)
 
 let init_player name = { name; hand = []; bank = 0; properties = [] }
 let add_to_hand player card = { player with hand = card :: player.hand }
