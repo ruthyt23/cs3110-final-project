@@ -354,7 +354,9 @@ let gui_main () =
           print_endline ("Received click for: " ^ name);
           flush stdout;
 
-          let popup_card = create_property_card name bg_color true false in
+          let popup_card =
+            create_property_card ~name ~bg_color ~is_popup:true ~clickable:false
+          in
           print_endline "Created popup card";
           flush stdout;
 
@@ -473,7 +475,10 @@ let gui_main () =
               ("Number of cards after filtering: "
               ^ string_of_int (List.length !left_cards));
 
-            let right_card = create_property_card name bg_color false false in
+            let right_card =
+              create_property_card ~name ~bg_color ~is_popup:false
+                ~clickable:false
+            in
 
             (* Store the new card's information in card_info *)
             let card_id = !next_card_id in
@@ -509,4 +514,4 @@ let gui_main () =
   Bogue.run board
 ;;
 
-alt_main ()
+gui_main ()

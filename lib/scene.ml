@@ -45,7 +45,7 @@ let properties =
   ]
 
 (* layout varies by number of players... we can hardcode this cause we have *)
-let create_property_card ~name ~bg_color ~is_popup =
+let create_property_card ~name ~bg_color ~is_popup ~clickable =
   let blue_bg = Style.(color_bg bg_color) in
 
   (* Card background *)
@@ -97,57 +97,61 @@ let create_property_card ~name ~bg_color ~is_popup =
     L.superpose ~center:true [ L.resident card; card_details ]
   in
 
-  (* Only add click handler if it's not a popup card *)
+  (* Only add click handler if it's not a popup and is clickable *)
   let final_layout =
-    if not is_popup then
+    if (not is_popup) && clickable then (
+      let card_id = !next_card_id in
+      incr next_card_id;
+
       let clickable_container =
         W.box ~w:400 ~h:628
           ~style:Style.(create ~background:(Style.color_bg (0, 0, 0, 0)) ())
           ()
       in
 
+      let combined_layout =
+        L.superpose ~center:true
+          [ final_card_layout; L.resident clickable_container ]
+      in
+
+      (* Store the info using the card ID and name only *)
+      Hashtbl.add card_info card_id (name, combined_layout, bg_color);
+
       let _ =
         W.on_click
           ~click:(fun _mouse_button ->
-            print_endline "\n=== Click Handler Start ===";
-            print_endline ("Popup active state: " ^ string_of_bool !popup_active);
             if not !popup_active then begin
               popup_active := true;
-              print_endline "Raw click detected - before any promise handling";
-              flush stdout;
-
-              print_endline
-                ("Current promise state: "
-                ^
-                if Lwt.is_sleeping !card_promise then "sleeping"
-                else "not sleeping");
-              flush stdout;
-
-              print_endline ("Attempting to resolve promise for " ^ name);
               try
-                try
-                  Lwt.wakeup !card_resolver (final_card_layout, name, bg_color);
-                  print_endline "Successfully resolved promise"
-                with Invalid_argument _ ->
-                  print_endline "Promise already resolved - ignoring click"
-              with exn ->
-                print_endline ("Unexpected exception: " ^ Printexc.to_string exn);
-                print_endline (Printexc.get_backtrace ())
+                Lwt.wakeup !card_resolver (name, bg_color);
+                (* Modified to pass just name and color *)
+                print_endline "Successfully resolved promise"
+              with Invalid_argument _ ->
+                print_endline "Promise already resolved - ignoring click"
             end
             else begin
               print_endline "Click ignored - popup is active"
             end;
-            print_endline "=== Click Handler End ===\n";
             flush stdout)
           clickable_container
       in
 
-      L.superpose ~center:true
-        [ final_card_layout; L.resident clickable_container ]
+      combined_layout)
     else final_card_layout
   in
 
   final_layout
+
+let create_deck () =
+  List.map
+    (fun (name, color) ->
+      let card =
+        create_property_card ~name ~bg_color:color ~is_popup:false
+          ~clickable:true
+      in
+      print_endline ("Created card: " ^ name);
+      card)
+    properties
 
 let color_of_string = function
   | "Brown" -> (139, 69, 19, 255) (* Saddle brown *)
@@ -160,14 +164,6 @@ let color_of_string = function
   | "Blue" -> (0, 0, 255, 255) (* Pure blue *)
   | _ -> (128, 128, 128, 255)
 (* Default gray for unknown colors *)
-
-let map_deck () =
-  List.map
-    (fun (name, color) ->
-      let card = create_property_card ~name ~bg_color:color ~is_popup:false in
-      print_endline ("Created card: " ^ name);
-      card)
-    properties
 
 let create_overlapping_cards widgets = L.flat ~sep:(-280) widgets
 
@@ -274,9 +270,3 @@ let organize_table_cards cards =
     ^ string_of_int (List.length group_layouts)
     ^ " groups");
   final_layout
-
-let create_deck () =
-  let cards = map_deck () in
-  print_endline
-    ("Created deck with " ^ string_of_int (List.length cards) ^ " cards");
-  cards
