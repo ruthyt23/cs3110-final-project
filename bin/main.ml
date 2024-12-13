@@ -6,6 +6,13 @@ open Scene
 open Bogue
 open Lwt.Infix
 
+let () =
+  Sys.set_signal Sys.sigint
+    (Sys.Signal_handle
+       (fun _ ->
+         print_endline "\n Qutting Program ...";
+         exit 0))
+
 let card_border =
   Style.(mk_border ~radius:8 (mk_line ~width:20 ~color:(255, 255, 255, 255) ()))
 
@@ -395,12 +402,13 @@ let gui_main () =
           (* Create final popup layout *)
 
           (* Create screen with background and attach popup *)
-          let screen = Popup.attach  
-            ~bg:(Draw.(set_alpha 180 black)) (* Semi-transparent black background *)
-            final_layout 
-            popup_content in
+          let screen =
+            Popup.attach
+              ~bg:Draw.(set_alpha 180 black)
+                (* Semi-transparent black background *)
+              final_layout popup_content
+          in
 
-         
           (* Handle cancel button *)
           let handle_cancel _b =
             L.set_show screen false;
@@ -499,10 +507,10 @@ let gui_main () =
   in
 
   Bogue.run board
-;;
 
 let display_welcome_screen () =
-  let message = {|
+  let message =
+    {|
   ╔════════════════════════════════════════════════╗
   ║             Welcome to Monopoly Deal            ║
   ║                                                ║
@@ -512,7 +520,8 @@ let display_welcome_screen () =
   ║                                                ║
   ║         Press Enter to start the game...       ║
   ╚════════════════════════════════════════════════╝
-  |} in
+  |}
+  in
   print_endline message;
   let _ = read_line () in
   ()

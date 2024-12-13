@@ -91,20 +91,23 @@ let select_color player =
     let color, _ = List.nth properties property_index in
     color)
 
-let rec just_say_no_check player1 player2 player1_wants =
-  if Player.card_check player2 Deck.just_say_no then (
-    print_endline
-      ("\n" ^ get_name player2
-     ^ " has a Just Say No card. Would you like to use it? (y/n)");
-    match read_line () with
-    | "y" ->
-        let new_player2 = remove_from_hand player2 Deck.just_say_no in
-        just_say_no_check new_player2 player1 (not player1_wants)
-    | "n" -> (player1, player2, player1_wants)
-    | _ ->
-        print_endline "Invalid input entered. Try again!";
-        just_say_no_check player1 player2 player1_wants)
-  else (player1, player2, player1_wants)
+let rec just_say_no_check player1 player2 player1_wants test_flag =
+  match test_flag with
+  | true -> (player1, player2, player1_wants)
+  | false ->
+      if Player.card_check player2 Deck.just_say_no then (
+        print_endline
+          ("\n" ^ get_name player2
+         ^ " has a Just Say No card. Would you like to use it? (y/n)");
+        match read_line () with
+        | "y" ->
+            let new_player2 = remove_from_hand player2 Deck.just_say_no in
+            just_say_no_check new_player2 player1 (not player1_wants) test_flag
+        | "n" -> (player1, player2, player1_wants)
+        | _ ->
+            print_endline "Invalid input entered. Try again!";
+            just_say_no_check player1 player2 player1_wants test_flag)
+      else (player1, player2, player1_wants)
 
 let play_card game_state player card test_flag =
   let player_without_card = remove_from_hand player card in
@@ -136,7 +139,7 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player test_flag
           in
           let new_player1, new_player2, check =
-            just_say_no_check player_without_card target_player false
+            just_say_no_check player_without_card target_player false test_flag
           in
           let updated_player, updated_target_player =
             if check then (
@@ -174,7 +177,7 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player test_flag
           in
           let new_player1, new_player2, check =
-            just_say_no_check player_without_card target_player false
+            just_say_no_check player_without_card target_player false test_flag
           in
           let updated_player, updated_target_player =
             if check then (
@@ -208,7 +211,7 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player test_flag
           in
           let new_player1, new_player2, check =
-            just_say_no_check player_without_card target_player false
+            just_say_no_check player_without_card target_player false test_flag
           in
           let updated_player, updated_target_player =
             if check then (
@@ -266,7 +269,7 @@ let play_card game_state player card test_flag =
           in
           let target_color = select_color target_player in
           let new_player1, new_player2, check =
-            just_say_no_check player_without_card target_player false
+            just_say_no_check player_without_card target_player false test_flag
           in
           let updated_player, updated_target_player =
             if check then (
@@ -345,6 +348,7 @@ let play_card game_state player card test_flag =
               in
               let new_player1, new_player2, check =
                 just_say_no_check player_without_card target_player false
+                  test_flag
               in
               let updated_player, updated_target_player =
                 if check then (

@@ -28,8 +28,7 @@ let popup_active = ref false
 (* Add this near the top with other global references *)
 let next_card_id = ref 0
 let card_info = Hashtbl.create 10
-let card_layouts = Hashtbl.create 10  (* color -> layout mapping *)
-
+let card_layouts = Hashtbl.create 10 (* color -> layout mapping *)
 
 (* Near the top with other global values *)
 let properties =
@@ -169,15 +168,17 @@ let color_of_string = function
 
 let create_overlapping_cards widgets =
   (* Set each card to its fixed size *)
-  List.iter (fun widget -> 
-    L.set_width widget (int_of_float(400.0 *. 0.8));
-    L.set_height widget (int_of_float(628. *. 0.8))
-  ) widgets;
-  
+  List.iter
+    (fun widget ->
+      L.set_width widget (int_of_float (400.0 *. 0.8));
+      L.set_height widget (int_of_float (628. *. 0.8)))
+    widgets;
+
   let layout = L.flat ~sep:(-280) widgets in
   L.sety layout 0;
   layout
 
+let card_layouts = Hashtbl.create 10 (* color -> layout mapping *)
 
 let create_vertical_cards widgets =
   print_endline

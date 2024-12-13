@@ -216,6 +216,111 @@ let card_action_tests =
        in
        get_bank (List.nth players 1) == 8 && get_bank (List.nth players 2) == 8)
       true;
+    (* Add hand management tests *)
+    create_int_test "Hand Size - after multiple draws"
+      (let player = init_player "test" in
+       let updated_player =
+         List.fold_left
+           (fun p _ -> Project3110.Player.add_to_hand p (Money 1))
+           player
+           (List.init 5 (fun _ -> ()))
+       in
+       List.length (Project3110.Player.get_hand updated_player))
+      5;
+    create_bool_test "Hand Contains - specific card check"
+      (let player =
+         add_hand (init_player "test")
+           [
+             Money 1; Property ("Brown", "Baltic Avenue"); Action "Deal Breaker";
+           ]
+       in
+       Project3110.Player.card_check player (Action "Deal Breaker"))
+      true;
+    create_bool_test "Sly Deal - valid property exists"
+      (let p1 = init_player "p1" in
+       let p2 =
+         add_property (init_player "p2") [ ("Brown", "Mediterranean Avenue") ]
+       in
+       try
+         let _, _ =
+           Project3110.CardAction.sly_deal p1 p2
+             ("Brown", "Mediterranean Avenue")
+         in
+         true
+       with _ -> false)
+      true;
+    create_bool_test "Deal Breaker - complete set required"
+      (let p1 = init_player "p1" in
+       let p2 =
+         add_property (init_player "p2")
+           [
+             ("Light Blue", "Oriental Avenue");
+             ("Light Blue", "Vermont Avenue");
+             ("Light Blue", "Connecticut Avenue");
+           ]
+       in
+       try
+         let new_p1, _ =
+           Project3110.CardAction.deal_breaker p1 p2
+             [ "Oriental Avenue"; "Vermont Avenue"; "Connecticut Avenue" ]
+             "Light Blue"
+         in
+         List.length (Project3110.Player.get_properties new_p1) = 3
+       with _ -> false)
+      true;
+    (* Add money management tests *)
+    create_int_test "Bank Operations - complex transaction"
+      (let player = bank_money (init_player "test") 10 in
+       let p1 = Project3110.Player.remove_from_bank player 3 in
+       let p2 = Project3110.Player.bank_money p1 5 in
+       let p3 = Project3110.Player.remove_from_bank p2 8 in
+       Project3110.Player.get_bank p3)
+      4;
+    (* Add deck manipulation tests *)
+    create_bool_test "Deck Drawing - maintains unique cards"
+      (let deck = Project3110.Deck.init_deck () in
+       let drawn_card, remaining_deck = Project3110.Deck.draw_card deck in
+       not (List.mem drawn_card remaining_deck))
+      true;
+    create_int_test "Deck Distribution - correct card type counts"
+      (let deck = Project3110.Deck.init_deck () in
+       let money_cards =
+         List.filter
+           (fun card ->
+             match card with
+             | Money _ -> true
+             | _ -> false)
+           deck
+       in
+       List.length money_cards)
+      20;
+    create_int_test "Property Count - mixed color sets"
+      (let player =
+         add_property (init_player "test")
+           [
+             ("Brown", "Mediterranean Avenue");
+             ("Brown", "Baltic Avenue");
+             ("Light Blue", "Oriental Avenue");
+             ("Railroad", "Reading Railroad");
+             ("Utility", "Electric Company");
+           ]
+       in
+       List.length (Project3110.Player.get_properties player))
+      5;
+    create_bool_test "Property Removal - specific property"
+      (let player =
+         add_property (init_player "test")
+           [ ("Brown", "Mediterranean Avenue"); ("Brown", "Baltic Avenue") ]
+       in
+       let updated_player =
+         Project3110.Player.remove_property player
+           ("Brown", "Mediterranean Avenue")
+       in
+       not
+         (List.mem
+            ("Brown", "Mediterranean Avenue")
+            (Project3110.Player.get_properties updated_player)))
+      true;
   ]
 
 (************************* Game State Tests ****************************)
@@ -269,6 +374,19 @@ let game_state_tests =
       true;
     create_bool_test "Win condition - no sets doesn't win"
       (Project3110.GameState.check_win_condition p1)
+      false;
+    create_bool_test "Win Condition - two sets not enough"
+      (let player =
+         add_property (init_player "almost")
+           [
+             ("Brown", "Mediterranean Avenue");
+             ("Brown", "Baltic Avenue");
+             ("Light Blue", "Oriental Avenue");
+             ("Light Blue", "Vermont Avenue");
+             ("Light Blue", "Connecticut Avenue");
+           ]
+       in
+       Project3110.GameState.check_win_condition player)
       false;
     (* Play Card Tests *)
     create_int_test "Play money card - increases bank"
@@ -392,6 +510,15 @@ let game_state_tests =
          false
        with Failure _ -> true)
       true;
+    (* Add game state validation tests *)
+    create_int_test "Initial Deal - correct card distribution"
+      (let game =
+         Project3110.GameState.init_game
+           [ init_player "p1"; init_player "p2"; init_player "p3" ]
+       in
+       let current_player = Project3110.GameState.get_current_player game in
+       List.length (Project3110.Player.get_hand current_player))
+      5;
   ]
 
 let tests =
@@ -465,6 +592,52 @@ let tests =
       2;
     create_int_test "Testing - Drawing multiple cards from deck "
       (List.length new_deck) 82;
+    create_int_test "Deck shuffling maintains card count"
+      (let deck = Project3110.Deck.init_deck () in
+       let shuffled = Project3110.Deck.shuffle_deck deck in
+       List.length shuffled)
+      89;
+    create_bool_test "Deck contains required action cards"
+      (let deck = Project3110.Deck.init_deck () in
+       let has_deal_breaker =
+         List.exists
+           (fun card ->
+             match card with
+             | Action "Deal Breaker" -> true
+             | _ -> false)
+           deck
+       in
+       let has_forced_deal =
+         List.exists
+           (fun card ->
+             match card with
+             | Action "Forced Deal" -> true
+             | _ -> false)
+           deck
+       in
+       has_deal_breaker && has_forced_deal)
+      true;
+    (* Add property set validation tests *)
+    create_bool_test "Property Set - complete light blue set"
+      (let player =
+         add_property (init_player "test")
+           [
+             ("Light Blue", "Oriental Avenue");
+             ("Light Blue", "Vermont Avenue");
+             ("Light Blue", "Connecticut Avenue");
+           ]
+       in
+       Project3110.Player.get_property_sets player = 1)
+      true;
+    create_bool_test "Property Set - incomplete set doesn't count"
+      (let player =
+         add_property (init_player "test")
+           [
+             ("Light Blue", "Oriental Avenue"); ("Light Blue", "Vermont Avenue");
+           ]
+       in
+       Project3110.Player.get_property_sets player = 0)
+      true;
   ]
 
 let run_tests =
