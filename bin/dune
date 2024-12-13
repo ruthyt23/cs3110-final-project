@@ -1,4 +1,6 @@
 (executable
  (public_name project3110)
  (name main)
- (libraries project3110))
+ (libraries project3110 bogue)
+ (preprocess
+  (pps lwt_ppx)))

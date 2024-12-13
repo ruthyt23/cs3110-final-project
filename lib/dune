@@ -1,4 +1,7 @@
 (library
  (name project3110)
  (instrumentation
-  (backend bisect_ppx)))
+  (backend bisect_ppx))
+ (libraries bogue lwt.unix)
+ (preprocess
+  (pps lwt_ppx)))

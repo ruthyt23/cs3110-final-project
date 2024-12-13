@@ -2,6 +2,32 @@ open Project3110
 open Player
 open GameState
 open Deck
+open Scene
+open Bogue
+open Lwt.Infix
+
+let card_border =
+  Style.(mk_border ~radius:8 (mk_line ~width:20 ~color:(255, 255, 255, 255) ()))
+
+let name_border =
+  Style.(mk_border ~radius:8 (mk_line ~width:2 ~color:(0, 0, 0, 255) ()))
+
+let property_border =
+  Style.(mk_border ~radius:100 (mk_line ~width:2 ~color:(0, 0, 0, 255) ()))
+
+let white_bg = Style.(color_bg (255, 255, 255, 255))
+
+(* Create a promise that will be resolved when a card is clicked *)
+let promise, resolver = Lwt.task ()
+let card_promise = ref promise
+let card_resolver = ref resolver
+
+(* Add a ref to track popup state *)
+let popup_active = ref false
+
+(* Add this near the top with other global references *)
+let next_card_id = ref 0
+let card_info = Hashtbl.create 10
 
 let rec print_hand cards =
   match cards with
@@ -190,7 +216,7 @@ let rec game_loop game_state =
     (* Continue the game loop with the updated state *)
     game_loop updated_state
 
-let main () =
+let alt_main () =
   print_endline "Welcome to Monopoly Deal!\n";
 
   let rec get_num_players () =
@@ -229,6 +255,263 @@ let main () =
   (* Start game loop *)
   print_endline "\nGame starting...\n";
   game_loop initial_state
+
+let gui_main () =
+  let left_cards = ref (create_deck ()) in
+  let right_cards = ref [] in
+
+  (* Reduce overall container size *)
+  let container_width = 1200 in
+  let container_height = 600 in
+
+  let main_container =
+    W.box ~w:container_width ~h:container_height
+      ~style:
+        Style.(
+          create
+            ~background:(color_bg (100, 100, 100, 255))
+            ~border:
+              (mk_border ~radius:12 (mk_line ~width:3 ~color:(0, 0, 0, 255) ()))
+            ())
+      ()
+  in
+
+  let left_section =
+    W.box
+      ~w:(container_width * 50 / 100)
+      ~h:container_height
+      ~style:
+        Style.(
+          create
+            ~background:(color_bg (80, 80, 80, 255))
+            ~border:
+              (mk_border ~radius:8 (mk_line ~width:2 ~color:(0, 0, 0, 255) ()))
+            ())
+      ()
+  in
+
+  let table_section =
+    W.box
+      ~w:(container_width * 50 / 100)
+      ~h:container_height
+      ~style:
+        Style.(
+          create
+            ~background:(color_bg (120, 120, 120, 255))
+            ~border:
+              (mk_border ~radius:8 (mk_line ~width:2 ~color:(0, 0, 0, 255) ()))
+            ())
+      ()
+  in
+
+  let left_content =
+    L.superpose
+      [ L.resident left_section; create_overlapping_cards !left_cards ]
+  in
+
+  (* Create the cards layout with size constraints *)
+  let right_cards_layout = organize_table_cards !right_cards in
+  L.set_width right_cards_layout (container_width * 45 / 100);
+  L.set_height right_cards_layout container_height;
+
+  (* Create a scrollable view with smaller dimensions *)
+  let scrollable_view =
+    L.make_clip
+      ~w:(container_width * 45 / 100)
+      ~h:(container_height - 20) (* Leave room for scrollbar *)
+      right_cards_layout
+  in
+
+  (* Position the scrollable view *)
+  L.setx scrollable_view 10;
+  (* Add some padding from the left *)
+  L.sety scrollable_view 10;
+
+  (* Add some padding from the top *)
+
+  (* Combine the background and scrollable content *)
+  let right_content =
+    L.superpose [ L.resident table_section; scrollable_view ]
+  in
+
+  let final_layout =
+    L.superpose ~center:true
+      [ L.resident main_container; L.flat [ left_content; right_content ] ]
+  in
+
+  let board = Bogue.of_layout final_layout in
+
+  (* Listen for card clicks and show popup *)
+  let _ =
+    Lwt.async (fun () ->
+        let rec loop () =
+          print_endline "\n=== Async Loop Start ===";
+          print_endline "Waiting for card click...";
+          flush stdout;
+
+          !card_promise >>= fun (name, bg_color) ->
+          (* Modified to receive just name and color *)
+          print_endline ("Received click for: " ^ name);
+          flush stdout;
+
+          let popup_card =
+            create_property_card ~name ~bg_color ~is_popup:true ~clickable:false
+          in
+          print_endline "Created popup card";
+          flush stdout;
+
+          (* Create a new promise that will be resolved when the popup is
+             closed *)
+          let close_promise, close_resolver = Lwt.task () in
+          print_endline "Created close promise";
+          flush stdout;
+
+          (* Create buttons *)
+          let play_button =
+            W.button ~border_radius:3
+              ~border_color:Draw.(opaque green)
+              "Play Card"
+          in
+          let cancel_button =
+            W.button ~border_radius:3 ~border_color:Draw.(opaque red) "Cancel"
+          in
+
+          let button_box =
+            W.box ~w:100 ~h:40
+              ~style:
+                Style.(
+                  create
+                    ~background:(color_bg (200, 200, 200, 255))
+                    ~border:
+                      (mk_border ~radius:4
+                         (mk_line ~width:2 ~color:(0, 0, 0, 255) ()))
+                    ())
+              ()
+          in
+
+          let buttons_layout =
+            L.flat ~sep:20
+              [
+                L.superpose ~center:true
+                  [ L.resident button_box; L.resident play_button ];
+                L.superpose ~center:true
+                  [ L.resident button_box; L.resident cancel_button ];
+              ]
+          in
+
+          (* Combine card and buttons *)
+          let popup_content =
+            L.tower ~align:Center ~sep:10 [ popup_card; buttons_layout ]
+          in
+
+          (* Create final popup layout *)
+
+          (* Create screen with background and attach popup *)
+          let screen =
+            Popup.attach
+              ~bg:Draw.(set_alpha 180 black)
+                (* Semi-transparent black background *)
+              final_layout popup_content
+          in
+
+          (* Handle cancel button *)
+          let handle_cancel _b =
+            L.set_show screen false;
+            L.set_show popup_content false;
+            popup_active := false;
+            let new_promise, new_resolver = Lwt.task () in
+            card_promise := new_promise;
+            card_resolver := new_resolver;
+            Lwt.wakeup close_resolver ()
+          in
+
+          (* Handle play button *)
+          let update_layouts () =
+            print_endline "\n=== update_layouts start ===";
+            print_endline
+              ("Right cards count: " ^ string_of_int (List.length !right_cards));
+
+            let left_layout = create_overlapping_cards !left_cards in
+
+            (* List.iter (fun widget -> L.set_width widget (int_of_float(400.0
+               *. 0.8)); L.set_height widget (int_of_float(628.0 *. 0.8)) )
+               !right_cards; *)
+            let right_cards_layout = organize_table_cards !right_cards in
+
+            L.set_width right_cards_layout (container_width * 45 / 100);
+
+            let scrollable_view =
+              L.make_clip
+                ~w:(container_width * 45 / 100)
+                ~h:(container_height - 20) right_cards_layout
+            in
+
+            (* L.setx scrollable_view 10; L.sety scrollable_view 10; *)
+            L.set_rooms left_content [ L.resident left_section; left_layout ];
+
+            L.set_rooms right_content
+              [ L.resident table_section; scrollable_view ];
+
+            print_endline "=== update_layouts end ===\n"
+          in
+
+          let handle_play _b =
+            print_endline ("Trying to remove card: " ^ name);
+
+            (* Filter out only the clicked card, keeping all others *)
+            left_cards :=
+              List.filter
+                (fun layout ->
+                  let keep =
+                    Hashtbl.fold
+                      (fun _id (card_name, card_layout, _) acc ->
+                        if layout == card_layout then card_name <> name else acc)
+                      card_info true
+                  in
+                  keep)
+                !left_cards;
+
+            print_endline
+              ("Number of cards after filtering: "
+              ^ string_of_int (List.length !left_cards));
+
+            let right_card =
+              create_property_card ~name ~bg_color ~is_popup:false
+                ~clickable:false
+            in
+
+            (* Store the new card's information in card_info *)
+            let card_id = !next_card_id in
+            incr next_card_id;
+            Hashtbl.add card_info card_id (name, right_card, bg_color);
+
+            (* Append to right_cards instead of replacing *)
+            right_cards := !right_cards @ [ right_card ];
+
+            print_endline
+              ("Number of right cards: "
+              ^ string_of_int (List.length !right_cards));
+
+            update_layouts ();
+            handle_cancel _b
+          in
+
+          (* Initial layout setup *)
+          update_layouts ();
+
+          W.on_button_release ~release:handle_cancel cancel_button;
+          W.on_button_release ~release:handle_play play_button;
+
+          (* Wait for popup to be closed before continuing the loop *)
+          close_promise >>= fun () ->
+          print_endline "=== Async Loop End ===\n";
+          flush stdout;
+          loop ()
+        in
+        loop ())
+  in
+
+  Bogue.run board
 ;;
 
-main ()
+gui_main ()
