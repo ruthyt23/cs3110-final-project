@@ -8,6 +8,12 @@ type game_state = {
   deck : Deck.card list;
   discard_pile : Deck.card list;
 }
+(** [game_state] represents the current state of a Monopoly Deal game. It
+    contains:
+    - A list of all players
+    - The index of the current player's turn
+    - The remaining deck of cards
+    - A discard pile of played cards *)
 
 let next_turn game_state =
   let num_players = List.length game_state.players in

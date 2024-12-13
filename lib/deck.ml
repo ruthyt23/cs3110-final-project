@@ -1,3 +1,7 @@
+(** [card] represents a card in the Monopoly Deal game. It can be either:
+    - An Action card with a specific action name
+    - A Property card with a color and property name
+    - A Money card with a monetary value *)
 type card =
   | Action of string
   | Property of string * string
