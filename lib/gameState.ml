@@ -249,169 +249,156 @@ let play_card game_state player card test_flag =
             get_target_player game_state.players player false
           in
           let target_color = select_color target_player in
-          let updated_player, updated_target_player =
-            if target_color = "" then (
-              print_string "The chosen player has no properties. Sorry!\n";
-              (player_without_card, target_player))
-            else if
-              Deck.property_count
-                (Player.get_properties target_player)
-                target_color
-              != Deck.full_property_count target_color
-            then (
-              print_string
-                ("The " ^ target_color
-               ^ " set hasn't been complete yet. Sorry!\n");
-              (player_without_card, target_player))
-            else
-              let _, prop_list =
-                List.hd
-                  (List.filter
-                     (fun (color, _) -> color = target_color)
-                     Player.property_sets)
-              in
+          if target_color = "" then (
+            print_string "The chosen player has no properties. Sorry!\n";
+            (game_state, 0))
+          else if
+            Deck.property_count
+              (Player.get_properties target_player)
+              target_color
+            != Deck.full_property_count target_color
+          then (
+            print_string
+              ("The " ^ target_color ^ " set hasn't been complete yet. Sorry!\n");
+            (game_state, 0))
+          else
+            let _, prop_list =
+              List.hd
+                (List.filter
+                   (fun (color, _) -> color = target_color)
+                   Player.property_sets)
+            in
+            let updated_player, updated_target_player =
               deal_breaker player_without_card target_player prop_list
                 target_color
-          in
-          let updated_players =
-            List.map
-              (fun p ->
-                if get_name p = get_name player then updated_player
-                else if get_name p = get_name target_player then
-                  updated_target_player
-                else p)
-              game_state.players
-          in
-          ({ game_state with players = updated_players }, 0)
+            in
+
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player
+                  else if get_name p = get_name target_player then
+                    updated_target_player
+                  else p)
+                game_state.players
+            in
+            ({ game_state with players = updated_players }, 0)
       | "Wild Rent Card" ->
-          let updated_player, updated_target_player, mult =
-            if List.length (get_properties player_without_card) = 0 then (
-              print_string
-                "You currently don't have any properties to charge rent on. \
-                 Sorry!\n";
-              (player_without_card, None, 1))
-            else
-              let rec double_rent_check player loop_num =
-                let double_rent_card_check =
-                  card_count player Deck.double_the_rent
-                in
-                if double_rent_card_check = 0 then (player, 1)
-                else (
-                  print_endline
-                    "You have a Double the Rent card. Would you like to use \
-                     it? (y/n)";
-                  match read_line () with
-                  | "y" ->
-                      let new_player1 =
-                        remove_from_hand player Deck.double_the_rent
-                      in
-                      if double_rent_card_check = 2 then
-                        double_rent_check new_player1 2
-                      else (new_player1, 2 * loop_num)
-                  | "n" -> (player, 1)
-                  | _ ->
-                      print_endline "Invalid input entered. Try again!";
-                      double_rent_check player 1)
+          if List.length (get_properties player_without_card) = 0 then (
+            print_string
+              "You currently don't have any properties to charge rent on. Sorry!\n";
+            (game_state, 0))
+          else
+            let rec double_rent_check player loop_num =
+              let double_rent_card_check =
+                card_count player Deck.double_the_rent
               in
-              let updated_player1, mult =
-                double_rent_check player_without_card 1
-              in
-              let color = select_color updated_player1 in
-              let target_player =
-                get_target_player game_state.players updated_player1 false
-              in
-              let updated_pl1, updated_pl2 =
-                charge_rent updated_player1 target_player color mult
-              in
-              (updated_pl1, Some updated_pl2, mult)
-          in
-          let updated_players =
-            List.map
-              (fun p ->
-                if get_name p = get_name player then updated_player
-                else
-                  match updated_target_player with
-                  | Some name -> if get_name p = get_name name then name else p
-                  | None -> p)
-              game_state.players
-          in
-          ( { game_state with players = updated_players },
-            if mult > 1 then mult / 2 else 0 )
+              if double_rent_card_check = 0 then (player, 1)
+              else (
+                print_endline
+                  "You have a Double the Rent card. Would you like to use it? \
+                   (y/n)";
+                match read_line () with
+                | "y" ->
+                    let new_player1 =
+                      remove_from_hand player Deck.double_the_rent
+                    in
+                    if double_rent_card_check = 2 then
+                      double_rent_check new_player1 2
+                    else (new_player1, 2 * loop_num)
+                | "n" -> (player, 1)
+                | _ ->
+                    print_endline "Invalid input entered. Try again!";
+                    double_rent_check player 1)
+            in
+            let updated_player1, mult =
+              double_rent_check player_without_card 1
+            in
+            let color = select_color updated_player1 in
+            let target_player =
+              get_target_player game_state.players updated_player1 false
+            in
+            let updated_player, updated_target_player =
+              charge_rent updated_player1 target_player color mult
+            in
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player
+                  else if get_name p = get_name target_player then
+                    updated_target_player
+                  else p)
+                game_state.players
+            in
+            ( { game_state with players = updated_players },
+              if mult > 1 then mult / 2 else 0 )
       | "House" ->
-          let updated_player =
-            if get_property_sets player_without_card = 0 then (
-              print_string
-                "You currently don't have a complete property set to place a \
-                 house on. Sorry!\n";
-              player_without_card)
-            else
-              let target_color = select_color player_without_card in
-              add_house player_without_card target_color
-          in
-          let updated_players =
-            List.map
-              (fun p ->
-                if get_name p = get_name player then updated_player else p)
-              game_state.players
-          in
-          ( {
-              game_state with
-              players = updated_players;
-              discard_pile = updated_discard_pile;
-            },
-            0 )
+          if get_property_sets player_without_card = 0 then (
+            print_string
+              "You currently don't have a complete property set to place a \
+               house on. Sorry!\n";
+            (game_state, 0))
+          else
+            let target_color = select_color player_without_card in
+            let updated_player = add_house player_without_card target_color in
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player else p)
+                game_state.players
+            in
+            ( {
+                game_state with
+                players = updated_players;
+                discard_pile = updated_discard_pile;
+              },
+              0 )
       | "Hotel" ->
-          let updated_player =
-            if get_property_sets player_without_card = 0 then (
+          if get_property_sets player_without_card = 0 then (
+            print_string
+              "You currently don't have a complete property set to place a \
+               hotel on. Sorry!\n";
+            (game_state, 0))
+          else
+            let house_and_hotel =
+              Player.get_house_and_hotel player_without_card
+            in
+            let curr_houses =
+              List.filter
+                (fun (color, typ) ->
+                  typ = "House"
+                  && not (List.mem (color, "Hotel") house_and_hotel))
+                house_and_hotel
+            in
+            if List.length curr_houses = 0 then (
               print_string
-                "You currently don't have a complete property set to place a \
-                 hotel on. Sorry!\n";
-              player_without_card)
+                "You currently don't have any houses to place a hotel on. Sorry!\n";
+              (game_state, 0))
             else
-              let house_and_hotel =
-                Player.get_house_and_hotel player_without_card
+              let target_color =
+                print_endline "Properties with a House:";
+                List.iteri
+                  (fun i (color, _) -> Printf.printf "%d: %s\n" i color)
+                  curr_houses;
+                print_string "\nSelect the wanted color: ";
+                let property_index = int_of_string (read_line ()) in
+                let color, _ = List.nth curr_houses property_index in
+                color
               in
-              let curr_houses =
-                List.filter
-                  (fun (color, typ) ->
-                    typ = "House"
-                    && not (List.mem (color, "Hotel") house_and_hotel))
-                  house_and_hotel
+
+              let updated_player = add_hotel player_without_card target_color in
+              let updated_players =
+                List.map
+                  (fun p ->
+                    if get_name p = get_name player then updated_player else p)
+                  game_state.players
               in
-              if List.length curr_houses = 0 then (
-                print_string
-                  "You currently don't have any houses to place a hotel on. \
-                   Sorry!\n";
-                player_without_card)
-              else
-                let target_color =
-                  print_endline "Properties with a House:";
-                  List.iteri
-                    (fun i (color, _) -> Printf.printf "%d: %s\n" i color)
-                    curr_houses;
-                  print_string "\nSelect the wanted color: ";
-                  let property_index = int_of_string (read_line ()) in
-                  let color, _ = List.nth curr_houses property_index in
-                  color
-                in
-                add_hotel player_without_card target_color
-          in
-          let updated_players =
-            List.map
-              (fun p ->
-                if get_name p = get_name player then updated_player else p)
-              game_state.players
-          in
-          ( {
-              game_state with
-              players = updated_players;
-              discard_pile = updated_discard_pile;
-            },
-            0 )
-      | "Double The Rent" ->
-          print_string
-            "Please wait to play this card until you play a Rent card!";
-          (game_state, 0)
+              ( {
+                  game_state with
+                  players = updated_players;
+                  discard_pile = updated_discard_pile;
+                },
+                0 )
       | _ -> failwith "not yet implemented")
 
 let draw_card game_state =
