@@ -3,6 +3,7 @@ type player = {
   hand : Deck.card list;
   bank : int;
   properties : (string * string) list;
+  house_and_hotel : (string * string) list;
 }
 (** [player] represents a player in the Monopoly Deal game. It contains:
     - The player's name
@@ -11,7 +12,9 @@ type player = {
     - A list of properties they own Representation Invariant: bank must be
       non-negative *)
 
-let init_player name = { name; hand = []; bank = 0; properties = [] }
+let init_player name =
+  { name; hand = []; bank = 0; properties = []; house_and_hotel = [] }
+
 let add_to_hand player card = { player with hand = card :: player.hand }
 let bank_money player amount = { player with bank = player.bank + amount }
 
@@ -32,6 +35,7 @@ let get_name player = player.name
 let get_hand player = player.hand
 let get_bank player = player.bank
 let get_properties player = player.properties
+let get_house_and_hotel player = player.house_and_hotel
 
 let remove_from_hand player card =
   let count = ref 0 in
@@ -71,3 +75,15 @@ let get_property_sets player =
 
 let card_count player card = List.length (List.filter (( = ) card) player.hand)
 let card_check player card = card_count player card > 0
+
+let add_house player color =
+  {
+    player with
+    house_and_hotel = player.house_and_hotel @ [ (color, "House") ];
+  }
+
+let add_hotel player color =
+  {
+    player with
+    house_and_hotel = player.house_and_hotel @ [ (color, "Hotel") ];
+  }

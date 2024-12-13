@@ -24,6 +24,8 @@ let check_win_condition player =
   let properties_count = get_property_sets player in
   properties_count >= 3
 
+let get_discard game_state = game_state.discard_pile
+
 (* Simple mock inputs for testing *)
 let mock_target_index = ref 1
 let mock_property_index = ref 0
@@ -75,8 +77,6 @@ let select_property player prompt test_flag =
       print_string ("\nSelect a property to " ^ prompt ^ ": ");
       let property_index = int_of_string (read_line ()) in
       List.nth properties property_index
-
-let get_discard game_state = game_state.discard_pile
 
 let select_color player =
   let properties = Player.get_properties player in
@@ -332,14 +332,73 @@ let play_card game_state player card test_flag =
             in
             ( { game_state with players = updated_players },
               if mult > 1 then mult / 2 else 0 )
-      (* | "House" -> if get_property_sets player_without_card = 0 then (
-         print_string "You currently don't have a complete property set.
-         Sorry!\n"; game_state) else let target_player = get_target_player
-         game_state.players player false in game_state | "Hotel" -> if
-         get_property_sets player_without_card = 0 then ( print_string "You
-         currently don't have a complete property set. Sorry!\n"; game_state)
-         else let target_player = get_target_player game_state.players player
-         false in game_state *)
+      | "House" ->
+          if get_property_sets player_without_card = 0 then (
+            print_string
+              "You currently don't have a complete property set to place a \
+               house on. Sorry!\n";
+            (game_state, 0))
+          else
+            let target_color = select_color player_without_card in
+            let updated_player = add_house player_without_card target_color in
+            let updated_players =
+              List.map
+                (fun p ->
+                  if get_name p = get_name player then updated_player else p)
+                game_state.players
+            in
+            ( {
+                game_state with
+                players = updated_players;
+                discard_pile = updated_discard_pile;
+              },
+              0 )
+      | "Hotel" ->
+          if get_property_sets player_without_card = 0 then (
+            print_string
+              "You currently don't have a complete property set to place a \
+               hotel on. Sorry!\n";
+            (game_state, 0))
+          else
+            let house_and_hotel =
+              Player.get_house_and_hotel player_without_card
+            in
+            let curr_houses =
+              List.filter
+                (fun (color, typ) ->
+                  typ = "House"
+                  && not (List.mem (color, "Hotel") house_and_hotel))
+                house_and_hotel
+            in
+            if List.length curr_houses = 0 then (
+              print_string
+                "You currently don't have any houses to place a hotel on. Sorry!\n";
+              (game_state, 0))
+            else
+              let target_color =
+                print_endline "Properties with a House:";
+                List.iteri
+                  (fun i (color, _) -> Printf.printf "%d: %s\n" i color)
+                  curr_houses;
+                print_string "\nSelect the wanted color: ";
+                let property_index = int_of_string (read_line ()) in
+                let color, _ = List.nth curr_houses property_index in
+                color
+              in
+
+              let updated_player = add_hotel player_without_card target_color in
+              let updated_players =
+                List.map
+                  (fun p ->
+                    if get_name p = get_name player then updated_player else p)
+                  game_state.players
+              in
+              ( {
+                  game_state with
+                  players = updated_players;
+                  discard_pile = updated_discard_pile;
+                },
+                0 )
       | _ -> failwith "not yet implemented")
 
 let draw_card game_state =

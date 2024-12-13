@@ -80,7 +80,21 @@ let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
 let charge_rent pl1 pl2 color mult =
   let count = property_count (get_properties pl1) color in
   let rent_charges = Deck.property_rent color in
-  let rent_amt = List.nth rent_charges (count - 1) * mult in
+  let house_and_hotel =
+    let house_and_hotel_count =
+      List.fold_left
+        (fun acc (curr_color, _) -> if color = curr_color then acc + 1 else acc)
+        0
+        (Player.get_house_and_hotel pl1)
+    in
+    if house_and_hotel_count = 1 then 3
+    else if house_and_hotel_count = 2 then 7
+    else 0
+  in
+  let rent_amt = (List.nth rent_charges (count - 1) * mult) + house_and_hotel in
   print_string
     ("Rent of $" ^ string_of_int rent_amt ^ "M charged to " ^ get_name pl2);
   debt_collector pl1 pl2 rent_amt
+
+let add_house = Player.add_house
+let add_hotel = Player.add_hotel
