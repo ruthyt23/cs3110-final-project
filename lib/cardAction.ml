@@ -70,7 +70,7 @@ let its_my_birthday player pl_lst =
     (List.rev updated_other_players)
 
 (** Steal full set of properties from another player based on the color they say
-    they want *)
+    they want. *)
 let deal_breaker (pl1 : player) (pl2 : player) prop_lst (color : string) =
   List.fold_left
     (fun (curr_pl1, curr_pl2) curr_prop ->
