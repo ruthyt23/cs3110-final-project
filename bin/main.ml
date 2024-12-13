@@ -24,18 +24,6 @@ let property_border =
 
 let white_bg = Style.(color_bg (255, 255, 255, 255))
 
-(* Create a promise that will be resolved when a card is clicked *)
-let promise, resolver = Lwt.task ()
-let card_promise = ref promise
-let card_resolver = ref resolver
-
-(* Add a ref to track popup state *)
-let popup_active = ref false
-
-(* Add this near the top with other global references *)
-let next_card_id = ref 0
-let card_info = Hashtbl.create 10
-
 let rec print_hand cards =
   match cards with
   | [] -> ()
@@ -414,13 +402,12 @@ let gui_main () =
           (* Create final popup layout *)
 
           (* Create screen with background and attach popup *)
-          let screen =
-            Popup.attach
-              ~bg:Draw.(set_alpha 180 black)
-                (* Semi-transparent black background *)
-              final_layout popup_content
-          in
+          let screen = Popup.attach  
+            ~bg:(Draw.(set_alpha 180 black)) (* Semi-transparent black background *)
+            final_layout 
+            popup_content in
 
+         
           (* Handle cancel button *)
           let handle_cancel _b =
             L.set_show screen false;

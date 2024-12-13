@@ -28,6 +28,7 @@ let popup_active = ref false
 (* Add this near the top with other global references *)
 let next_card_id = ref 0
 let card_info = Hashtbl.create 10
+let card_layouts = Hashtbl.create 10 (* color -> layout mapping *)
 
 (* Near the top with other global values *)
 let properties =
